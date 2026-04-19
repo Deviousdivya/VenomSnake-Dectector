@@ -1,0 +1,9 @@
+{
+  "name": "VenomSnake Detector",
+  "description": "A high-end platform for snake species identification, safety protocols, and real-time emergency assistance using AI and 3D visualization.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
