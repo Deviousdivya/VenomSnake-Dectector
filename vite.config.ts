@@ -40,6 +40,17 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+            'vendor-ui': ['lucide-react', 'motion', 'react', 'react-dom'],
+          }
+        }
+      }
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

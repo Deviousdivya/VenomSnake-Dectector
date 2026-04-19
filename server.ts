@@ -173,4 +173,9 @@ async function startServer() {
   });
 }
 
-startServer();
+// Start server for local development and standard production
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+}
+
+export default app;
