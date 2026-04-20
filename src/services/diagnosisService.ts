@@ -42,6 +42,10 @@ export async function analyzeSymptoms(
     return JSON.parse(response.text);
   } catch (error: any) {
     console.error('AI Diagnosis Error:', error);
-    throw new Error(error.message || "Triage link failed.");
+    let userMessage = "Triage link failed.";
+    if (error.message?.includes("expired") || error.message?.includes("API key")) {
+      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in Vercel settings.";
+    }
+    throw new Error(userMessage);
   }
 }
