@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, Component, ErrorInfo, ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import { ArrowRight, ChevronDown, Zap, ShieldCheck, Globe, Info, Instagram, Twitter, Linkedin, WifiOff, Database } from 'lucide-react';
+import { ArrowRight, ChevronDown, Zap, ShieldCheck, Globe, Info, Instagram, Twitter, Linkedin, WifiOff, Database, AlertTriangle, RefreshCcw } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { ThreeSnake } from './components/ThreeSnake';
@@ -18,6 +18,53 @@ import { BiteLogic } from './components/BiteLogic';
 import { ConnectionProvider, useConnection } from './context/ConnectionContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { cn } from './lib/utils';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("System Failure Detected:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 text-center">
+          <div className="max-w-md space-y-6 glass p-10 rounded-[2.5rem] border border-red-500/30">
+            <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+              <AlertTriangle size={40} />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold uppercase tracking-tighter">Bio-Core Fault</h1>
+              <p className="text-white/40 text-sm italic">The neural network encountered a critical interruption.</p>
+            </div>
+            <div className="p-4 bg-black/40 rounded-2xl border border-white/5 text-left">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2 underline decoration-red-500/30">Error Signature:</p>
+              <p className="text-[11px] font-mono text-white/60 line-clamp-3 leading-relaxed">
+                {this.state.error?.message || "Unknown cryptographic failure at origin."}
+              </p>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full py-4 bg-red-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all"
+            >
+              <RefreshCcw size={16} />
+              Attempt Node Re-Synchronization
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
@@ -277,10 +324,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <ConnectionProvider>
-        <AppContent />
-      </ConnectionProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <ConnectionProvider>
+          <AppContent />
+        </ConnectionProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
