@@ -42,6 +42,10 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
     return JSON.parse(response.text);
   } catch (error: any) {
     console.error('AI Detection Error:', error);
-    throw new Error(error.message || "Satellite link unstable. Scan aborted.");
+    let userMessage = "Satellite link unstable. Scan aborted.";
+    if (error.message?.includes("expired") || error.message?.includes("API key")) {
+      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in Vercel settings.";
+    }
+    throw new Error(userMessage);
   }
 }

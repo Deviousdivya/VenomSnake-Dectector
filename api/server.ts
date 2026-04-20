@@ -39,12 +39,14 @@ app.post('/api/sightings', async (req, res) => {
 });
 
 app.get('/api/news', async (req, res) => {
+  const fallbackNews = [
+    { id: 'f1', title: 'WHO Launches New Snakebite Management Guidelines', excerpt: 'Global protocols updated for 2026 to include AI detection standards.', date: 'Apr 19, 2026', category: 'Health', imageUrl: 'https://picsum.photos/seed/who/800/600' },
+    { id: 'f2', title: 'Antivenom Synthesis Reaches 98% Efficiency in Labs', excerpt: 'New synthetic production methods promise to end supply shortages.', date: 'Apr 18, 2026', category: 'Research', imageUrl: 'https://picsum.photos/seed/lab/800/600' },
+    { id: 'f3', title: 'Rural Clinics Get Solar-Powered Antivenom Fridges', excerpt: 'Technology enabling lifesaving storage in remote areas without electricity.', date: 'Apr 17, 2026', category: 'Tech', imageUrl: 'https://picsum.photos/seed/tech/800/600' }
+  ];
+
   const apiKey = process.env.NEWS_API_KEY;
   if (!apiKey) {
-    const fallbackNews = [
-      { id: 'f1', title: 'WHO Launches New Snakebite Management Guidelines', excerpt: 'Global protocols updated for 2026 to include AI detection standards.', date: 'Apr 19, 2026', category: 'Health', imageUrl: 'https://picsum.photos/seed/who/800/600' },
-      { id: 'f2', title: 'Antivenom Synthesis Reaches 98% Efficiency in Labs', excerpt: 'New synthetic production methods promise to end supply shortages.', date: 'Apr 18, 2026', category: 'Research', imageUrl: 'https://picsum.photos/seed/lab/800/600' }
-    ];
     return res.json({ articles: fallbackNews, status: 'fallback' });
   }
 
@@ -62,10 +64,12 @@ app.get('/api/news', async (req, res) => {
       }));
       res.json({ articles });
     } else {
-      throw new Error('NewsAPI failed');
+      console.warn("NewsAPI Error:", data.message || "Unknown error");
+      res.json({ articles: fallbackNews, status: 'fallback' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to synchronize with global news nodes' });
+    console.error("News sync failed", error);
+    res.json({ articles: fallbackNews, status: 'fallback' });
   }
 });
 

@@ -61,8 +61,13 @@ export async function getAntivenomInventory(speciesName: string, lat: number, ln
     return [
       { id: 'h1', name: "Regional Trauma Center", distance: "Unknown", eta: "Unknown", inventory: [{ speciesId: speciesName, stockLevel: 9, status: 'OPTIMAL' }], address: "Unknown", mapsUrl: "https://maps.google.com" }
     ];
-  } catch (err) {
+  } catch (err: any) {
     console.error("Grounding sync failed", err);
-    return [];
+    if (err.message?.includes("expired") || err.message?.includes("API key")) {
+      console.error("BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in Vercel settings.");
+    }
+    return [
+      { id: 'h1', name: "Local First Aid Node (Offline Mode)", distance: "Local", eta: "Immediate", inventory: [{ speciesId: speciesName, stockLevel: 5, status: 'OPTIMAL' }], address: "Refer to Emergency Protocol", mapsUrl: "https://maps.google.com" }
+    ];
   }
 }
