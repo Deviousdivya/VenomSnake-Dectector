@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { DiagnosisResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
@@ -26,14 +26,16 @@ export async function analyzeSymptoms(
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [{
-          text: `ULTRA-FAST CLINICAL ANALYSIS: Bite at ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return ONLY JSON matching schema in ${languageName}. Schema: ${JSON.stringify(DIAGNOSIS_SCHEMA)}`
+          text: `Analyze symptoms for a bite at ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return JSON in ${languageName}.`
         }]
       }],
       config: {
         responseMimeType: "application/json",
+        responseSchema: DIAGNOSIS_SCHEMA,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
       }
     });
 
