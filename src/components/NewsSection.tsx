@@ -12,6 +12,9 @@ export function NewsSection() {
     const fetchNews = async () => {
       try {
         const res = await fetch('/api/news');
+        if (!res.ok) {
+          throw new Error(`API error: ${res.status}`);
+        }
         const data = await res.json();
         setNews(data.articles || []);
         setCached(data.cached || false);

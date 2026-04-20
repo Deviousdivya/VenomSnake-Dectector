@@ -17,11 +17,15 @@ const DETECTION_SCHEMA = {
 };
 
 export async function detectSnake(base64Image: string, mimeType: string, languageName: string = "English"): Promise<DetectionResult> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in environment variables.");
+  }
+
   try {
     const dataOnly = base64Image.split(',')[1] || base64Image;
     
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-flash-latest",
       contents: [{
         parts: [
           { text: `FAST IDENTIFY: Provide snake species data for the attached image in ${languageName}. Be concise. Return JSON matching schema.` },
