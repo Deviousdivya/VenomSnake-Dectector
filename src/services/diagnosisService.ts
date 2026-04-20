@@ -20,6 +20,10 @@ export async function analyzeSymptoms(
   symptoms: string[], 
   languageName: string = "English"
 ): Promise<DiagnosisResult> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in environment variables.");
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3.1-pro-preview",
