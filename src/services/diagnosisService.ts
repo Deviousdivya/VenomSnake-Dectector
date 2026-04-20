@@ -26,15 +26,14 @@ export async function analyzeSymptoms(
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-flash-latest",
       contents: [{
         parts: [{
-          text: `CLINICAL SYNDROMIC ANALYSIS: Bite at ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return JSON matching schema in ${languageName}.`
+          text: `ULTRA-FAST CLINICAL ANALYSIS: Bite at ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return ONLY JSON matching schema in ${languageName}. Schema: ${JSON.stringify(DIAGNOSIS_SCHEMA)}`
         }]
       }],
       config: {
         responseMimeType: "application/json",
-        responseSchema: DIAGNOSIS_SCHEMA,
       }
     });
 

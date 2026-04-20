@@ -28,13 +28,12 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
       model: "gemini-flash-latest",
       contents: [{
         parts: [
-          { text: `FAST IDENTIFY: Provide snake species data for the attached image in ${languageName}. Be concise. Return JSON matching schema.` },
+          { text: `ULTRA-FAST IDENTIFY: Identify snake species in ${languageName}. Return ONLY JSON. Schema: ${JSON.stringify(DETECTION_SCHEMA)}` },
           { inlineData: { data: dataOnly, mimeType: mimeType || 'image/jpeg' } }
         ]
       }],
       config: {
         responseMimeType: "application/json",
-        responseSchema: DETECTION_SCHEMA,
       }
     });
 

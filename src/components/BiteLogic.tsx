@@ -16,6 +16,7 @@ export function BiteLogic() {
   const [selectedPart, setSelectedPart] = useState<string | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<DiagnosisResult | null>(null);
   const [showInventory, setShowInventory] = useState(false);
 
@@ -38,6 +39,7 @@ export function BiteLogic() {
   const handleDiagnose = async () => {
     if (!selectedPart || selectedSymptoms.length === 0) return;
     setLoading(true);
+    setError(null);
     try {
       const activeSymptoms = symptoms
         .filter(s => selectedSymptoms.includes(s.id))
@@ -45,8 +47,9 @@ export function BiteLogic() {
       
       const res = await analyzeSymptoms(selectedPart, activeSymptoms, languageName);
       setReport(res);
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Triage link failed. Please retry.");
     } finally {
       setLoading(false);
     }
@@ -189,6 +192,13 @@ export function BiteLogic() {
                     ))}
                   </div>
                 </div>
+
+                {error && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center gap-3 text-red-500 text-sm font-bold animate-pulse">
+                    <AlertTriangle size={18} />
+                    {error}
+                  </div>
+                )}
 
                 <div className="pt-6 border-t border-white/5">
                    <button

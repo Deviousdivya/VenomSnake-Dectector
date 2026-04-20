@@ -54,17 +54,19 @@ app.get('/api/news', async (req, res) => {
     const response = await fetch(`https://newsapi.org/v2/everything?q=snakes+antivenom+herpetology&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}`);
     const data = await response.json();
 
-    if (data.status === 'ok') {
+    if (data.status === 'ok' && data.articles.length > 0) {
       const articles = data.articles.map((art: any, idx: number) => ({
         id: idx.toString(),
         title: art.title,
         excerpt: art.description,
         imageUrl: art.urlToImage || `https://picsum.photos/seed/${idx}/800/600`,
-        url: art.url
+        url: art.url,
+        category: 'Field Report', // NEWSAPI doesn't provide this, so we tag it
+        date: new Date(art.publishedAt).toLocaleDateString()
       }));
       res.json({ articles });
     } else {
-      console.warn("NewsAPI Error:", data.message || "Unknown error");
+      console.warn("NewsAPI empty or failed. Using fallback.");
       res.json({ articles: fallbackNews, status: 'fallback' });
     }
   } catch (error) {
