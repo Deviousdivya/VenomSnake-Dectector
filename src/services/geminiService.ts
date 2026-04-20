@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { DetectionResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
@@ -25,15 +25,17 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
     const dataOnly = base64Image.split(',')[1] || base64Image;
     
     const response = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [
-          { text: `ULTRA-FAST IDENTIFY: Identify snake species in ${languageName}. Return ONLY JSON. Schema: ${JSON.stringify(DETECTION_SCHEMA)}` },
+          { text: `Identify snake species in ${languageName}. Return JSON.` },
           { inlineData: { data: dataOnly, mimeType: mimeType || 'image/jpeg' } }
         ]
       }],
       config: {
         responseMimeType: "application/json",
+        responseSchema: DETECTION_SCHEMA,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
       }
     });
 
