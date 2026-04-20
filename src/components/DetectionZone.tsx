@@ -60,48 +60,26 @@ export function DetectionZone() {
       reader.onload = async () => {
         const fullBase64 = reader.result as string;
         
-        // Phase 1: Optimization (Client-Side Edge)
         setLoadingPhase('optimizing');
         const compressedBase64 = await compressImage(fullBase64);
         
-        // Phase 2: AI Analysis (Scalable Asynchronous Queue)
         setLoadingPhase('analyzing');
         
-        // Simulation of non-blocking job submission
-        const jobRes = await fetch('/api/analyze-job', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: compressedBase64, language: languageName })
-        });
-        const { jobId } = await jobRes.json();
-        
-        // Polling the Message Queue
-        const pollInterval = setInterval(async () => {
-          try {
-            const statusRes = await fetch(`/api/analyze-job/${jobId}`);
-            const jobData = await statusRes.json();
-            
-            if (jobData.status === 'COMPLETED') {
-              clearInterval(pollInterval);
-              
-              // Now call the real AI service for actual result (stateless proxy)
-              const res = await detectSnake(compressedBase64, 'image/jpeg', languageName);
-              
-              setResult(res);
-              localStorage.setItem(`snake_scan_${Date.now()}`, JSON.stringify(res));
-              setLoading(false);
-              setLoadingPhase('idle');
-            }
-          } catch (pollErr) {
-            console.error("Polling error", pollErr);
-          }
-        }, 2000);
+        try {
+          const res = await detectSnake(compressedBase64, 'image/jpeg', languageName);
+          setResult(res);
+          localStorage.setItem(`snake_scan_${Date.now()}`, JSON.stringify(res));
+        } catch (apiErr: any) {
+          setError(apiErr.message || "Bio-scan failed. The satellite link might be unstable.");
+        } finally {
+          setLoading(false);
+          setLoadingPhase('idle');
+        }
       };
     } catch (err) {
       console.error(err);
-      setError("Bio-scan failed. The satellite link might be unstable. Please try again.");
+      setError("Image processing failed.");
       setLoading(false);
-      setLoadingPhase('idle');
     }
   };
 

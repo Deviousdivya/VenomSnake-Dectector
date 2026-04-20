@@ -18,7 +18,7 @@ app.use(helmet({
 }));
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '15mb' })); // Increased for image uploads
 
 // Rate Limiting: 100 requests per 15 minutes per IP
 const limiter = rateLimit({
@@ -31,21 +31,21 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// -- 📡 4. GLOBAL INTEL & SIGHTINGS --
+app.post('/api/sightings', async (req, res) => {
+  const { species, location } = req.body;
+  console.log(`[Bio-Sighting] ${species} detected at ${location.lat}, ${location.lng}`);
+  res.json({ status: 'Uplinked' });
+});
+
 app.get('/api/news', async (req, res) => {
-  const cacheKey = 'global_snake_news';
-  const cachedData = apiCache.get(cacheKey);
-
-  if (cachedData) {
-    return res.json({ cached: true, ...(cachedData as Record<string, any>) });
-  }
-
   const apiKey = process.env.NEWS_API_KEY;
   if (!apiKey) {
     const fallbackNews = [
       { id: 'f1', title: 'WHO Launches New Snakebite Management Guidelines', excerpt: 'Global protocols updated for 2026 to include AI detection standards.', date: 'Apr 19, 2026', category: 'Health', imageUrl: 'https://picsum.photos/seed/who/800/600' },
       { id: 'f2', title: 'Antivenom Synthesis Reaches 98% Efficiency in Labs', excerpt: 'New synthetic production methods promise to end supply shortages.', date: 'Apr 18, 2026', category: 'Research', imageUrl: 'https://picsum.photos/seed/lab/800/600' }
     ];
-    return res.json({ cached: false, articles: fallbackNews, status: 'fallback' });
+    return res.json({ articles: fallbackNews, status: 'fallback' });
   }
 
   try {
@@ -53,80 +53,20 @@ app.get('/api/news', async (req, res) => {
     const data = await response.json();
 
     if (data.status === 'ok') {
-      const formattedArticles = data.articles.map((art: any, idx: number) => ({
+      const articles = data.articles.map((art: any, idx: number) => ({
         id: idx.toString(),
         title: art.title,
         excerpt: art.description,
-        date: new Date(art.publishedAt).toLocaleDateString(),
-        category: 'Live Intel',
         imageUrl: art.urlToImage || `https://picsum.photos/seed/${idx}/800/600`,
         url: art.url
       }));
-      
-      const newsResponse = { articles: formattedArticles };
-      apiCache.set(cacheKey, newsResponse);
-      res.json({ cached: false, ...newsResponse });
+      res.json({ articles });
     } else {
-      throw new Error(data.message || 'NewsAPI failed');
+      throw new Error('NewsAPI failed');
     }
   } catch (error) {
-    console.error('News Fetch Error:', error);
     res.status(500).json({ error: 'Failed to synchronize with global news nodes' });
   }
-});
-
-// -- ⚡ 4. ASYNCHRONOUS PROCESSING (Simulation) --
-const jobQueue: Map<string, { status: string; result?: any }> = new Map();
-
-app.post('/api/analyze-job', async (req, res) => {
-  const jobId = Math.random().toString(36).substring(7);
-  jobQueue.set(jobId, { status: 'PENDING' });
-
-  setTimeout(() => {
-    jobQueue.set(jobId, { 
-      status: 'COMPLETED', 
-      result: { 
-        latched_species: "Vipera russelii",
-        confidence: 0.98,
-        processed_node: "MUMBAI-EDGE-04" 
-      } 
-    });
-  }, 5000);
-
-  res.json({ jobId, message: 'Bio-data ingested into high-speed queue.' });
-});
-
-app.get('/api/analyze-job/:id', (req, res) => {
-  const job = jobQueue.get(req.params.id);
-  if (!job) return res.status(404).json({ error: 'Job not found' });
-  res.json(job);
-});
-
-// -- 📡 5. GLOBAL SIGHTINGS API (Simulation) --
-interface Sighting {
-  id: string;
-  species: string;
-  location: { lat: number; lng: number };
-  timestamp: number;
-}
-const sightings: Sighting[] = [];
-
-app.post('/api/sightings', (req, res) => {
-  const { species, location } = req.body;
-  if (!species) return res.status(400).json({ error: 'Species data missing' });
-  
-  const newSighting = {
-    id: `sig-${Date.now()}`,
-    species,
-    location: location || { lat: 12.9716, lng: 77.5946 }, 
-    timestamp: Date.now()
-  };
-  sightings.push(newSighting);
-  res.json({ success: true, sighting: newSighting });
-});
-
-app.get('/api/sightings', (req, res) => {
-  res.json(sightings.slice(-50));
 });
 
 app.get('/api/health', (req, res) => {

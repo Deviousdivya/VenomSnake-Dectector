@@ -1,7 +1,7 @@
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { DetectionResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 const DETECTION_SCHEMA = {
   type: Type.OBJECT,
@@ -10,47 +10,34 @@ const DETECTION_SCHEMA = {
     scientificName: { type: Type.STRING },
     riskLevel: { type: Type.STRING, enum: ['VENOMOUS', 'NON-VENOMOUS', 'UNKNOWN'] },
     description: { type: Type.STRING },
-    precautions: { 
-      type: Type.ARRAY, 
-      items: { type: Type.STRING } 
-    },
-    emergencySteps: { 
-      type: Type.ARRAY, 
-      items: { type: Type.STRING } 
-    }
+    precautions: { type: Type.ARRAY, items: { type: Type.STRING } },
+    emergencySteps: { type: Type.ARRAY, items: { type: Type.STRING } }
   },
   required: ['commonName', 'scientificName', 'riskLevel', 'description', 'precautions', 'emergencySteps']
 };
 
 export async function detectSnake(base64Image: string, mimeType: string, languageName: string = "English"): Promise<DetectionResult> {
-  const result = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
+  try {
+    const dataOnly = base64Image.split(',')[1] || base64Image;
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [{
         parts: [
-          {
-            text: `FAST IDENTIFY: Provide snake species data for the attached image in ${languageName}. Be extremely concise. Focus on high-accuracy risk level assessment. All fields including description and steps must be in ${languageName} script. Return JSON matching schema.`
-          },
-          {
-            inlineData: {
-              data: base64Image,
-              mimeType: mimeType
-            }
-          }
+          { text: `FAST IDENTIFY: Provide snake species data for the attached image in ${languageName}. Be concise. Return JSON matching schema.` },
+          { inlineData: { data: dataOnly, mimeType: mimeType || 'image/jpeg' } }
         ]
+      }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: DETECTION_SCHEMA,
       }
-    ],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: DETECTION_SCHEMA,
-      thinkingConfig: {
-        thinkingLevel: ThinkingLevel.LOW
-      }
-    }
-  });
+    });
 
-  const text = result.text;
-  if (!text) throw new Error("Failed to get response from Gemini");
-  
-  return JSON.parse(text) as DetectionResult;
+    if (!response.text) throw new Error("Bio-scan returned no data.");
+    return JSON.parse(response.text);
+  } catch (error: any) {
+    console.error('AI Detection Error:', error);
+    throw new Error(error.message || "Satellite link unstable. Scan aborted.");
+  }
 }
