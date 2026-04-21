@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { DiagnosisResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
@@ -29,21 +29,43 @@ export async function analyzeSymptoms(
       model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [{
-          text: `Analyze symptoms for a bite at ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return JSON in ${languageName}.`
+          text: `EVALUATE BITE: Site: ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return ONLY JSON matching schema in ${languageName}. 
+          venomType must be one of: NEUROTOXIC, HEMOTOXIC, CYTOTOXIC, UNKNOWN.
+          severity must be one of: MILD, MODERATE, CRITICAL.`
         }]
       }],
       config: {
         responseMimeType: "application/json",
-        responseSchema: DIAGNOSIS_SCHEMA,
-        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
+        responseSchema: DIAGNOSIS_SCHEMA
       }
     });
 
-    if (!response.text) throw new Error("Clinical nodes offline.");
-    return JSON.parse(response.text);
+    const rawText = response.text || "";
+    
+    // Robust cleanup to handle markdown wrapping or other noise
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    const cleanJson = jsonMatch ? jsonMatch[0] : rawText;
+
+    if (!cleanJson) {
+      throw new Error("Bio-Core nodes returned empty syndromic data.");
+    }
+
+    try {
+      const data = JSON.parse(cleanJson);
+      
+      // Strict field validation to prevent downstream crashes
+      if (!data.venomType || !data.severity || !data.summary || !Array.isArray(data.physicianNotes)) {
+        throw new Error("Incomplete report data. Please re-run scan.");
+      }
+
+      return data as DiagnosisResult;
+    } catch (parseError) {
+      console.error("Diagnosis Parse Failure:", cleanJson);
+      throw new Error("Triage data corruption. Bio-scanners need alignment.");
+    }
   } catch (error: any) {
     console.error('AI Diagnosis Error:', error);
-    let userMessage = "Triage link failed.";
+    let userMessage = error.message || "Triage link failed.";
     if (error.message?.includes("expired") || error.message?.includes("API key")) {
       userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in Vercel settings.";
     }

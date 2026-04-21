@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Newspaper, AlertCircle, Menu, X, Zap, ChevronDown, Globe, Activity } from 'lucide-react';
+import { Shield, Newspaper, AlertCircle, Menu, X, Zap, ChevronDown, Globe, Activity, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../context/LanguageContext';

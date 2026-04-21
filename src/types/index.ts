@@ -7,6 +7,9 @@ export interface DetectionResult {
   description: string;
   precautions: string[];
   emergencySteps: string[];
+  antidoteInfo?: string;
+  rescueContacts?: string[];
+  medicalFacility?: string;
 }
 
 export interface NewsItem {

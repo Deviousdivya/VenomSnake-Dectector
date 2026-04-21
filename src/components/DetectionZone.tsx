@@ -1,13 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, Loader2, AlertCircle, CheckCircle2, ShieldAlert, BookOpen, HeartPulse, Sparkles, Camera } from 'lucide-react';
+import { Upload, Loader2, AlertCircle, CheckCircle2, ShieldAlert, BookOpen, HeartPulse, Sparkles, Camera, Activity, MapPin, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { detectSnake } from '../services/geminiService';
 import { DetectionResult } from '../types';
 import { cn } from '../lib/utils';
 import { compressImage } from '../utils/imageCompressor';
 import { useLanguage } from '../context/LanguageContext';
-import { AntivenomDashboard } from './AntivenomDashboard';
 import { ActivePerception } from './ActivePerception';
 
 export function DetectionZone() {
@@ -18,7 +17,6 @@ export function DetectionZone() {
   const [loadingPhase, setLoadingPhase] = useState<'idle' | 'optimizing' | 'analyzing'>('idle');
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showInventory, setShowInventory] = useState(false);
   const [showActiveLens, setShowActiveLens] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -54,6 +52,17 @@ export function DetectionZone() {
     setLoading(true);
     setError(null);
 
+    // Get location for smarter results
+    let locationStr = 'Unknown';
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      locationStr = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+    } catch (e) {
+      console.warn("Location access denied. Using general data.");
+    }
+
     try {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -66,7 +75,7 @@ export function DetectionZone() {
         setLoadingPhase('analyzing');
         
         try {
-          const res = await detectSnake(compressedBase64, 'image/jpeg', languageName);
+          const res = await detectSnake(compressedBase64, 'image/jpeg', languageName, locationStr);
           setResult(res);
           localStorage.setItem(`snake_scan_${Date.now()}`, JSON.stringify(res));
         } catch (apiErr: any) {
@@ -249,15 +258,6 @@ export function DetectionZone() {
                       {result?.riskLevel === 'VENOMOUS' ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
                       {result?.riskLevel === 'VENOMOUS' ? t('risk_venomous') : t('risk_non_venomous')}
                     </div>
-
-                    {result?.riskLevel === 'VENOMOUS' && (
-                      <button 
-                        onClick={() => setShowInventory(true)}
-                        className="bg-brand-danger text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]"
-                      >
-                        {t('btn_locate_antivenom')}
-                      </button>
-                    )}
                   </div>
 
                   <div>
@@ -266,6 +266,52 @@ export function DetectionZone() {
                   </div>
 
                   <p className="text-white/70 text-sm leading-relaxed">{result?.description}</p>
+
+                  {/* Emergency Intel HUD */}
+                  {result?.riskLevel === 'VENOMOUS' && (
+                    <div className="space-y-4 p-5 bg-brand-danger/5 border border-brand-danger/20 rounded-2xl">
+                      <div className="flex items-center gap-2 text-brand-danger mb-2">
+                        <HeartPulse size={20} className="animate-pulse" />
+                        <span className="font-black uppercase tracking-tighter text-sm">Emergency Protocol HUD</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-4">
+                        {result.antidoteInfo && (
+                          <div className="flex items-start gap-4 p-4 glass border-white/5 rounded-xl">
+                            <Zap className="text-brand-safe shrink-0 mt-1" size={20} />
+                            <div>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-safe/60 mb-1">Recommended Antidote</p>
+                              <p className="text-sm font-bold text-white leading-tight">{result.antidoteInfo}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {result.medicalFacility && (
+                          <div className="flex items-start gap-4 p-4 glass border-white/5 rounded-xl">
+                            <MapPin className="text-brand-danger shrink-0 mt-1" size={20} />
+                            <div>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-danger/60 mb-1">Optimal Treatment Facility</p>
+                              <p className="text-sm font-bold text-white leading-tight">{result.medicalFacility}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {result.rescueContacts && result.rescueContacts.length > 0 && (
+                          <div className="flex items-start gap-4 p-4 glass border-white/5 rounded-xl">
+                            <Activity className="text-blue-400 shrink-0 mt-1" size={20} />
+                            <div>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400/60 mb-1">Rescue Command</p>
+                              <div className="space-y-1">
+                                {result.rescueContacts.map((contact, idx) => (
+                                  <p key={idx} className="text-sm font-bold text-white">{contact}</p>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/10">
                     <div className="space-y-3">
@@ -314,12 +360,6 @@ export function DetectionZone() {
           </AnimatePresence>
         </div>
       </div>
-
-      <AnimatePresence>
-        {showInventory && result && (
-          <AntivenomDashboard speciesName={result.commonName} onClose={() => setShowInventory(false)} />
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {showActiveLens && (
