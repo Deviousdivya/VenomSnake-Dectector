@@ -7,7 +7,7 @@ import { useState, Suspense, Component, ErrorInfo, ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import { ArrowRight, ChevronDown, Zap, ShieldCheck, Globe, Info, Instagram, Twitter, Linkedin, WifiOff, Database, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { ArrowRight, ChevronDown, Zap, ShieldCheck, Globe, Info, Instagram, Twitter, Linkedin, WifiOff, Database, AlertTriangle, RefreshCcw, MapPin } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { ThreeSnake } from './components/ThreeSnake';

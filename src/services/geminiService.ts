@@ -11,12 +11,15 @@ const DETECTION_SCHEMA = {
     riskLevel: { type: Type.STRING, enum: ['VENOMOUS', 'NON-VENOMOUS', 'UNKNOWN'] },
     description: { type: Type.STRING },
     precautions: { type: Type.ARRAY, items: { type: Type.STRING } },
-    emergencySteps: { type: Type.ARRAY, items: { type: Type.STRING } }
+    emergencySteps: { type: Type.ARRAY, items: { type: Type.STRING } },
+    antidoteInfo: { type: Type.STRING },
+    rescueContacts: { type: Type.ARRAY, items: { type: Type.STRING } },
+    medicalFacility: { type: Type.STRING }
   },
-  required: ['commonName', 'scientificName', 'riskLevel', 'description', 'precautions', 'emergencySteps']
+  required: ['commonName', 'scientificName', 'riskLevel', 'description', 'precautions', 'emergencySteps', 'antidoteInfo', 'rescueContacts', 'medicalFacility']
 };
 
-export async function detectSnake(base64Image: string, mimeType: string, languageName: string = "English"): Promise<DetectionResult> {
+export async function detectSnake(base64Image: string, mimeType: string, languageName: string = "English", userLocation?: string): Promise<DetectionResult> {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in environment variables.");
   }
@@ -28,7 +31,12 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
       model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [
-          { text: `Identify snake species in ${languageName}. Return JSON.` },
+          { text: `Identify snake species in ${languageName}. 
+          If VENOMOUS, provide:
+          1. Specific anti-venom/antidote name.
+          2. Local snake rescue team contact (if location known: ${userLocation || 'Unknown'}).
+          3. Best hospital for snakebite treatment nearby.
+          Return ONLY JSON conforming to the provided schema.` },
           { inlineData: { data: dataOnly, mimeType: mimeType || 'image/jpeg' } }
         ]
       }],

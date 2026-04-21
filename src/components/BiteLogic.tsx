@@ -9,7 +9,6 @@ import { DiagnosisResult } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { cn } from '../lib/utils';
 import { jsPDF } from 'jspdf';
-import { AntivenomDashboard } from './AntivenomDashboard';
 
 export function BiteLogic() {
   const { t, languageName } = useLanguage();
@@ -18,7 +17,6 @@ export function BiteLogic() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<DiagnosisResult | null>(null);
-  const [showInventory, setShowInventory] = useState(false);
 
   const symptoms = [
     { id: 'swelling', label: t('symptom_swelling') },
@@ -285,14 +283,8 @@ export function BiteLogic() {
 
                 <div className="flex flex-col md:flex-row gap-4">
                   <button 
-                    onClick={() => setShowInventory(true)}
-                    className="flex-1 py-5 rounded-3xl bg-brand-danger text-white font-black uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:scale-105 transition-all flex items-center justify-center gap-3"
-                  >
-                    <AlertTriangle size={20} /> Alert Trauma Center
-                  </button>
-                  <button 
                     onClick={handleDownloadPDF}
-                    className="flex-1 py-5 rounded-3xl glass text-white font-black uppercase tracking-widest text-sm border-white/5 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-5 rounded-3xl bg-brand-danger text-white font-black uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
                     <Download size={20} /> Download PDF Dossier
                   </button>
@@ -302,12 +294,6 @@ export function BiteLogic() {
           </AnimatePresence>
         </div>
       </div>
-
-      <AnimatePresence>
-        {showInventory && (
-          <AntivenomDashboard speciesName={report?.venomType || "Generic"} onClose={() => setShowInventory(false)} />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
