@@ -20,8 +20,18 @@ export async function analyzeSymptoms(
   symptoms: string[], 
   languageName: string = "English"
 ): Promise<DiagnosisResult> {
+  // Performance Check: Client-side Caching
+  const symptomsKey = symptoms.sort().join('_');
+  const cacheKey = `diagnose_${biteLocation}_${symptomsKey}_${languageName}`;
+  const cached = localStorage.getItem(cacheKey);
+  
+  if (cached) {
+    console.log("[Cache Hit] Serving cached triage data.");
+    return JSON.parse(cached);
+  }
+
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in environment variables.");
+    throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in settings.");
   }
 
   try {
@@ -36,38 +46,22 @@ export async function analyzeSymptoms(
       }],
       config: {
         responseMimeType: "application/json",
-        responseSchema: DIAGNOSIS_SCHEMA
+        responseSchema: DIAGNOSIS_SCHEMA as any
       }
     });
 
     const rawText = response.text || "";
+    const result = JSON.parse(rawText);
     
-    // Robust cleanup to handle markdown wrapping or other noise
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    const cleanJson = jsonMatch ? jsonMatch[0] : rawText;
-
-    if (!cleanJson) {
-      throw new Error("Bio-Core nodes returned empty syndromic data.");
-    }
-
-    try {
-      const data = JSON.parse(cleanJson);
-      
-      // Strict field validation to prevent downstream crashes
-      if (!data.venomType || !data.severity || !data.summary || !Array.isArray(data.physicianNotes)) {
-        throw new Error("Incomplete report data. Please re-run scan.");
-      }
-
-      return data as DiagnosisResult;
-    } catch (parseError) {
-      console.error("Diagnosis Parse Failure:", cleanJson);
-      throw new Error("Triage data corruption. Bio-scanners need alignment.");
-    }
+    // Save to cache
+    localStorage.setItem(cacheKey, JSON.stringify(result));
+    
+    return result;
   } catch (error: any) {
     console.error('AI Diagnosis Error:', error);
     let userMessage = error.message || "Triage link failed.";
     if (error.message?.includes("expired") || error.message?.includes("API key")) {
-      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in Vercel settings.";
+      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in settings.";
     }
     throw new Error(userMessage);
   }

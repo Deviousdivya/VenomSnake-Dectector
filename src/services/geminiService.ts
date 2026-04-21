@@ -20,13 +20,20 @@ const DETECTION_SCHEMA = {
 };
 
 export async function detectSnake(base64Image: string, mimeType: string, languageName: string = "English", userLocation?: string): Promise<DetectionResult> {
+  // 1. Performance Check: Client-side Caching
+  const dataOnly = base64Image.split(',')[1] || base64Image;
+  const cacheKey = `detect_${dataOnly.slice(0, 100)}_${languageName}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    console.log("[Cache Hit] Serving cached bio-scan data.");
+    return JSON.parse(cached);
+  }
+
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in environment variables.");
   }
 
   try {
-    const dataOnly = base64Image.split(',')[1] || base64Image;
-    
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite-preview",
       contents: [{
@@ -42,18 +49,23 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
       }],
       config: {
         responseMimeType: "application/json",
-        responseSchema: DETECTION_SCHEMA,
+        responseSchema: DETECTION_SCHEMA as any,
         thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
       }
     });
 
     if (!response.text) throw new Error("Bio-scan returned no data.");
-    return JSON.parse(response.text);
+    const result = JSON.parse(response.text);
+    
+    // Save to cache for fast recurring answers
+    localStorage.setItem(cacheKey, JSON.stringify(result));
+    
+    return result;
   } catch (error: any) {
     console.error('AI Detection Error:', error);
     let userMessage = "Satellite link unstable. Scan aborted.";
     if (error.message?.includes("expired") || error.message?.includes("API key")) {
-      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in Vercel settings.";
+      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in settings.";
     }
     throw new Error(userMessage);
   }
