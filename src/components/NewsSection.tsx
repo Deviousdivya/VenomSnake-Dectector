@@ -52,7 +52,10 @@ export function NewsSection() {
           <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">Species <span className="text-brand-safe">Insights</span></h2>
           <p className="text-white/60 max-w-xl">The latest intelligence from the global herpetological community, covering research, conservation, and safety technology.</p>
         </div>
-        <button className="px-6 py-3 glass rounded-full text-sm font-bold border-white/5 hover:bg-white/5 transition-all flex items-center gap-2 group">
+        <button 
+          onClick={() => window.open('https://news.google.com/search?q=snakebite+treatment+safety+herpetology', '_blank')}
+          className="px-6 py-3 glass rounded-full text-sm font-bold border-white/5 hover:bg-white/5 transition-all flex items-center gap-2 group"
+        >
           View All Logs
           <ExternalLink size={16} className="text-white/20 group-hover:text-brand-safe transition-all" />
         </button>

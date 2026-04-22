@@ -8,25 +8,54 @@ export function EmergencySOS() {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useLanguage();
 
+  const [copying, setCopying] = useState(false);
+
+  const getMapsUrl = (lat: number, lng: number) => `https://www.google.com/maps?q=${lat},${lng}`;
+
   const handleShareLocation = async () => {
     try {
       const pos: any = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
       });
       const { latitude, longitude } = pos.coords;
-      const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      const url = getMapsUrl(latitude, longitude);
       
+      const message = `EMERGENCY SOS: I have been bitten by a snake. Location: ${url}`;
+
+      // 1. Copy to clipboard
+      await navigator.clipboard.writeText(message);
+      setCopying(true);
+      setTimeout(() => setCopying(false), 2000);
+
+      // 2. Try Web Share
       if (navigator.share) {
         await navigator.share({
-          title: 'My Emergency Location - VenomSnake',
-          text: `Emergency! Possible snakebite at coordinates: ${latitude}, ${longitude}.`,
+          title: 'VenomSnake Emergency SOS',
+          text: message,
           url: url
         });
       } else {
-        window.open(url, '_blank');
+        // Fallback: SMS
+        window.location.href = `sms:?body=${encodeURIComponent(message)}`;
       }
     } catch (err) {
-      alert("Unable to acquire high-precision GPS lock. Check device permissions.");
+      alert("Please enable GPS permissions to share your rescue location.");
+    }
+  };
+
+  const handleWildlifeRescue = async () => {
+    try {
+      const pos: any = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+      });
+      const { latitude, longitude } = pos.coords;
+      const url = getMapsUrl(latitude, longitude);
+      const message = `SNAKE RESCUE NEEDED: Snake spotted at this location: ${url}. Please send a professional handler.`;
+      
+      // Auto-open SMS for wildlife rescue
+      window.location.href = `sms:?body=${encodeURIComponent(message)}`;
+    } catch (err) {
+      alert("GPS required for rescue teams to find you.");
     }
   };
 
@@ -128,18 +157,40 @@ export function EmergencySOS() {
                   </div>
                 </div>
 
-                {/* Location Share */}
+                {/* Location Share / SOS Broadcast */}
                 <div className="space-y-4">
-                  <button 
-                    onClick={handleShareLocation}
-                    className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-[#0a0a0a] font-bold text-sm tracking-tight hover:bg-white/90 transition-all active:scale-95"
-                  >
-                    <MapPin size={18} />
-                    {t('share_location')}
-                  </button>
-                  <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-safe/40 italic">
-                    <ShieldCheck size={12} />
-                    Encrypted via TLS 1.3 & JWT Tunnelling
+                  <div className="grid grid-cols-1 gap-3">
+                    <button 
+                      onClick={handleShareLocation}
+                      className={cn(
+                        "w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm tracking-tight transition-all active:scale-95",
+                        copying ? "bg-brand-safe text-[#0a0a0a]" : "bg-white text-[#0a0a0a] hover:bg-white/90"
+                      )}
+                    >
+                      {copying ? (
+                        <>
+                          <ShieldCheck size={18} />
+                          SOS Message Copied!
+                        </>
+                      ) : (
+                        <>
+                          <MapPin size={18} />
+                          {t('share_location')}
+                        </>
+                      )}
+                    </button>
+                    
+                    <button 
+                      onClick={handleWildlifeRescue}
+                      className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-brand-safe/10 border border-brand-safe/30 text-brand-safe font-bold text-sm tracking-tight hover:bg-brand-safe/20 transition-all active:scale-95"
+                    >
+                      <HeartPulse size={18} />
+                      Request Wildlife Rescue
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-safe/40 italic text-center">
+                    Broadcasts your GPS coordinates to emergency services and rescue teams.
                   </div>
                 </div>
               </div>

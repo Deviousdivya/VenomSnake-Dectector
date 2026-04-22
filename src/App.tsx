@@ -7,7 +7,7 @@ import { useState, Suspense, Component, ErrorInfo, ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import { ArrowRight, ChevronDown, Zap, ShieldCheck, Globe, Info, Instagram, Twitter, Linkedin, WifiOff, Database, AlertTriangle, RefreshCcw, MapPin } from 'lucide-react';
+import { ArrowRight, ChevronDown, Zap, ShieldCheck, Globe, Info, WifiOff, Database, AlertTriangle, RefreshCcw, MapPin } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { ThreeSnake } from './components/ThreeSnake';
@@ -260,11 +260,6 @@ function AppContent() {
             <p className="text-white/40 text-sm max-w-md leading-relaxed">
               {t('footer_desc')}
             </p>
-            <div className="flex items-center gap-4">
-               <a href="#" className="p-3 glass rounded-xl text-white/40 hover:text-brand-safe hover:border-brand-safe/30 transition-all"><Instagram size={20} /></a>
-               <a href="#" className="p-3 glass rounded-xl text-white/40 hover:text-brand-safe hover:border-brand-safe/30 transition-all"><Twitter size={20} /></a>
-               <a href="#" className="p-3 glass rounded-xl text-white/40 hover:text-brand-safe hover:border-brand-safe/30 transition-all"><Linkedin size={20} /></a>
-            </div>
           </div>
           
           <div className="space-y-6">
