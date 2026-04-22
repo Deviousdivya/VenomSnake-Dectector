@@ -39,9 +39,14 @@ export async function analyzeSymptoms(
       model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [{
-          text: `EVALUATE BITE: Site: ${biteLocation}. Symptoms: ${symptoms.join(", ")}. Return ONLY JSON matching schema in ${languageName}. 
-          venomType must be one of: NEUROTOXIC, HEMOTOXIC, CYTOTOXIC, UNKNOWN.
-          severity must be one of: MILD, MODERATE, CRITICAL.`
+          text: `EVALUATE SNAKEBITE: Site: ${biteLocation}. Symptoms: ${symptoms.join(", ")}. 
+          Return ONLY JSON in ${languageName}. 
+          
+          CRITICAL INSTRUCTIONS:
+          1. 'summary': Write in VERY SIMPLE, non-medical language that any child or layperson can understand. Explain what might be happening simply.
+          2. 'physicianNotes': List clear, simple bullet points of what the user should tell a doctor (e.g., 'My arm is swelling fast'). Avoid technical jargon.
+          3. venomType: Must be NEUROTOXIC, HEMOTOXIC, CYTOTOXIC, or UNKNOWN.
+          4. severity: Must be MILD, MODERATE, or CRITICAL.`
         }]
       }],
       config: {

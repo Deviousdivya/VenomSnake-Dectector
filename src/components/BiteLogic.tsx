@@ -65,38 +65,38 @@ export function BiteLogic() {
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
-    doc.text("VENOMSNAKE EMERGENCY DOSSIER", 15, 25);
+    doc.text("SNAKEBITE EMERGENCY GUIDE", 15, 25);
     
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
-    doc.text(`Generated: ${timestamp}`, 150, 35);
+    doc.text(`Created on: ${timestamp}`, 150, 35);
     
     doc.setFontSize(14);
     doc.setTextColor(239, 68, 68); // Brand Danger
-    doc.text("SYNDROMIC DIAGNOSIS REPORT", 15, 55);
+    doc.text("SUMMARY OF SYMPTOMS & HELP", 15, 55);
     
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
-    doc.text(`Bite Site: ${selectedPart?.toUpperCase()}`, 15, 65);
-    doc.text(`Venom Profile: ${report.venomType}`, 15, 75);
-    doc.text(`Severity: ${report.severity}`, 15, 85);
-    doc.text(`Confidence: ${report.confidence * 100}%`, 15, 95);
+    doc.text(`Bite Location: ${selectedPart?.toUpperCase()}`, 15, 65);
+    doc.text(`Likely Snake Type: ${report.venomType}`, 15, 75);
+    doc.text(`How Urgent: ${report.severity}`, 15, 85);
+    doc.text(`Our Confidence: ${report.confidence * 100}%`, 15, 95);
     
     doc.line(15, 100, 195, 100);
     
     doc.setFontSize(12);
-    doc.text("SYMPTOMS LOGGED:", 15, 110);
+    doc.text("SYMPTOMS YOU LOGGED:", 15, 110);
     const symptomsText = symptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.label).join(", ");
     doc.setFontSize(10);
     doc.text(doc.splitTextToSize(symptomsText, 170), 15, 120);
     
     doc.setFontSize(12);
-    doc.text("CLINICAL SUMMARY:", 15, 140);
+    doc.text("EASY SUMMARY:", 15, 140);
     doc.setFontSize(10);
     doc.text(doc.splitTextToSize(report.summary, 170), 15, 150);
     
     doc.setFontSize(12);
-    doc.text("CRITICAL PHYSICIAN NOTES:", 15, 180);
+    doc.text("WHAT TO TELL THE DOCTOR:", 15, 180);
     doc.setFontSize(10);
     report.physicianNotes.forEach((note, i) => {
       doc.text(`• ${note}`, 15, 190 + (i * 10));
@@ -106,7 +106,22 @@ export function BiteLogic() {
     doc.setTextColor(150, 150, 150);
     doc.text("DISCLAIMER: AI-generated guidance. Do not delay serum administration pending this report. Use for triage indexing only.", 15, 280);
     
-    doc.save(`VenomSnake_Report_${Date.now()}.pdf`);
+    // Robust Mobile-Friendly Download
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `VenomSnake_Report_${Date.now()}.pdf`;
+    
+    // Append to body, click, and cleanup
+    document.body.appendChild(link);
+    link.click();
+    
+    // Delay removal to ensure browser registers the click in some mobile environments
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   return (
@@ -119,7 +134,7 @@ export function BiteLogic() {
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-danger/10 border border-brand-danger/20 rounded-full text-[10px] font-bold uppercase tracking-widest text-brand-danger mb-2">
           <Activity size={12} />
-          Emergency Syndromic Engine
+          Quick Symptom Check
         </div>
         <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">{t('bite_logic_title')}</h2>
         <p className="text-white/40 max-w-2xl mx-auto">{t('bite_logic_subtitle')}</p>
@@ -212,7 +227,7 @@ export function BiteLogic() {
                     {loading ? (
                       <>
                         <Loader2 className="animate-spin" size={24} />
-                        Processing Syndromic Patterns...
+                        Checking your symptoms...
                       </>
                     ) : (
                       <>
@@ -238,7 +253,7 @@ export function BiteLogic() {
                     <div className="space-y-1">
                       <h3 className="text-3xl font-black uppercase tracking-tighter italic">{t('report_title')}</h3>
                       <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
-                         Verified AI Diagnosis • Triage: {report.severity}
+                         Helpful AI Advice • Level: {report.severity}
                       </div>
                     </div>
                     <button 
@@ -269,7 +284,7 @@ export function BiteLogic() {
                   </div>
 
                   <div className="pt-8 border-t border-white/10 space-y-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">{t('doctor_notes')}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">Tell your doctor these points:</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {report.physicianNotes.map((note, idx) => (
                         <div key={idx} className="flex gap-3 text-xs text-white/40">
@@ -286,7 +301,7 @@ export function BiteLogic() {
                     onClick={handleDownloadPDF}
                     className="w-full py-5 rounded-3xl bg-brand-danger text-white font-black uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
-                    <Download size={20} /> Download PDF Dossier
+                    <Download size={20} /> Save Detailed Guide
                   </button>
                 </div>
               </motion.div>
