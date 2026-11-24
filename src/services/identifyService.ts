@@ -104,7 +104,9 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 
 export async function identifySnake(o: IdentifyOptions): Promise<DetectionResult> {
   let pred: LocalPrediction | null = null;
-  const saveData = (navigator as any).connection?.saveData === true;
+  // The first scan downloads ~59 MB (then cached): skip it on data-saver or very slow connections and use the cloud step.
+  const conn = (navigator as any).connection;
+  const saveData = conn?.saveData === true || ['slow-2g', '2g', '3g'].includes(conn?.effectiveType);
 
   if (!saveData) {
     try {
