@@ -41,7 +41,7 @@ export default function SymptomChecker() {
     setLoading(true);
     setError(null);
     try {
-      setReport(await analyzeSymptoms(part, activeLabels(), languageName));
+      setReport(await analyzeSymptoms(part, activeLabels(), languageName, selected));
     } catch (e: any) {
       setError(e?.message || 'We could not generate the summary. Please try again.');
     } finally {
@@ -85,7 +85,7 @@ export default function SymptomChecker() {
     para(`Bite site: ${part}`, 12, true, 4);
     para(`Likely venom effect: ${report.venomType}`, 12, false, 4);
     para(`Urgency: ${report.severity}`, 12, false, 4);
-    para(`AI confidence: ${confidencePct(report.confidence)}%`, 12, false, 8);
+    para(report.offline ? 'Source: built-in basic guidance (AI unavailable)' : `AI confidence: ${confidencePct(report.confidence)}%`, 12, false, 8);
     para('Symptoms reported', 12, true, 3);
     para(activeLabels().join(', '), 11, false, 8);
     para('Summary', 12, true, 3);
@@ -208,7 +208,11 @@ export default function SymptomChecker() {
                     <div>
                       <p className="text-sm text-muted">{t('venom_type')}</p>
                       <p className="mt-1 font-serif text-4xl font-semibold text-ink">{report.venomType}</p>
-                      <p className="mt-2 text-sm text-muted">{t('confidence_level')}: {confidencePct(report.confidence)}%</p>
+                      {report.offline ? (
+                        <p className="badge badge-warn mt-3">Basic guidance — AI unavailable</p>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted">{t('confidence_level')}: {confidencePct(report.confidence)}%</p>
+                      )}
                     </div>
                     <div>
                       <p className="text-sm text-muted">{t('clinical_summary')}</p>

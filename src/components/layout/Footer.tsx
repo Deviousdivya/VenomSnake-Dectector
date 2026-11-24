@@ -26,6 +26,7 @@ export function Footer() {
             <li><Link className={link} to="/identify">{t('nav_identify')}</Link></li>
             <li><Link className={link} to="/symptom-checker">{t('nav_symptoms')}</Link></li>
             <li><Link className={link} to="/emergency">{t('nav_emergency')}</Link></li>
+            <li><Link className={link} to="/big-four">Big Four snakes</Link></li>
             <li><Link className={link} to="/insights">{t('nav_news')}</Link></li>
           </ul>
         </nav>

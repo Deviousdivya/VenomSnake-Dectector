@@ -28,4 +28,6 @@ export interface DiagnosisResult {
   summary: string;
   physicianNotes: string[];
   severity: 'MILD' | 'MODERATE' | 'CRITICAL';
+  /** true when this came from the built-in rules because the AI service was unavailable */
+  offline?: boolean;
 }

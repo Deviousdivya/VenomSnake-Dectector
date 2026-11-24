@@ -131,7 +131,7 @@ export default function Identify() {
             >
               <input {...getInputProps()} aria-label="Upload a photo of the snake" />
               {preview ? (
-                <img src={preview} alt="The photo you selected" className="absolute inset-0 h-full w-full object-cover" />
+                <img src={preview} alt="The photo you selected" className={cn('absolute inset-0 h-full w-full object-cover transition duration-500', busy && 'scale-105 brightness-90 saturate-75')} />
               ) : (
                 <div className="space-y-4">
                   <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-100 text-brand-700">
@@ -141,6 +141,14 @@ export default function Identify() {
                     <p className="font-serif text-2xl font-semibold">{t('dropzone_title')}</p>
                     <p className="mt-1 text-sm text-muted">{t('dropzone_subtitle')}</p>
                   </div>
+                </div>
+              )}
+              {preview && busy && (
+                <div className="absolute inset-0" aria-hidden>
+                  <div className="scan-beam" />
+                  {['left-4 top-4 border-l-2 border-t-2', 'right-4 top-4 border-r-2 border-t-2', 'left-4 bottom-4 border-b-2 border-l-2', 'right-4 bottom-4 border-b-2 border-r-2'].map((c) => (
+                    <span key={c} className={`absolute h-8 w-8 border-gold-300 ${c}`} />
+                  ))}
                 </div>
               )}
               {isDragActive && (
@@ -231,6 +239,18 @@ export default function Identify() {
                 <button type="button" onClick={handleScan} disabled={!file} className="btn btn-outline btn-sm mt-5">
                   Try again
                 </button>
+                <div className="mt-6 border-t border-line pt-5 text-sm text-ink-2">
+                  <p className="font-bold text-ink">In the meantime</p>
+                  <ul className="mt-2 space-y-1.5">
+                    <li>• Keep your distance, and treat the snake as venomous.</li>
+                    <li>
+                      • Compare it with <Link className="font-semibold text-brand-700 underline" to="/big-four">India's Big Four venomous snakes</Link>.
+                    </li>
+                    <li>
+                      • If you were bitten, use the <Link className="font-semibold text-brand-700 underline" to="/symptom-checker">symptom checker</Link>, which still gives basic guidance.
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
 

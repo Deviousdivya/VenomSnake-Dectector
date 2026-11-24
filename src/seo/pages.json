@@ -35,6 +35,15 @@
       "priority": "0.8"
     },
     {
+      "path": "/big-four",
+      "title": "Big Four Venomous Snakes of India | Identification & First Aid",
+      "description": "Recognise India's Big Four venomous snakes — Indian cobra, common krait, Russell's viper and saw-scaled viper — and know what to do after a bite.",
+      "h1": "India's Big Four venomous snakes",
+      "summary": "A field guide to India's four most medically important snakes - the Indian cobra, common krait, Russell's viper and saw-scaled viper: what they look like, their venom, where they live, and why every bite needs a hospital.",
+      "changefreq": "monthly",
+      "priority": "0.8"
+    },
+    {
       "path": "/emergency",
       "title": "Snakebite First Aid & Emergency Numbers (India) | VenomSnake",
       "description": "Bitten by a snake? Call 108, keep still, and get to a hospital fast. Step-by-step first aid, what not to do, and the nearest hospitals to your location.",

@@ -34,33 +34,41 @@ export function Header() {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 12);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
 
   const links = [
     { to: '/identify', label: t('nav_identify') },
     { to: '/symptom-checker', label: t('nav_symptoms') },
+    { to: '/big-four', label: 'Big Four' },
     { to: '/emergency', label: t('nav_emergency') },
     { to: '/insights', label: t('nav_news') },
   ];
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'rounded-full px-4 py-2 text-[15px] font-medium no-underline transition',
+      'whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] font-semibold no-underline transition',
       isActive ? 'bg-brand-100 text-brand-900' : 'text-ink-2 hover:bg-brand-50 hover:text-ink'
     );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur-md">
+    <header className={cn('sticky top-0 z-40 border-b backdrop-blur-md transition-all duration-300', scrolled ? 'border-line bg-paper/95 shadow-[0_8px_30px_-18px_rgba(18,35,29,0.45)]' : 'border-transparent bg-paper/70')}>
       <div className="container-x flex h-[68px] items-center justify-between gap-3">
-        <Link to="/" className="flex items-center gap-2.5 no-underline" aria-label="VenomSnake Detector - home">
-          <img src="/favicon.svg" alt="" width={36} height={36} />
-          <span className="font-serif text-[22px] font-semibold leading-none tracking-tight text-ink">
-            VenomSnake<span className="hidden text-brand-700 sm:inline"> Detector</span>
+        <Link to="/" className="group flex items-center gap-2.5 no-underline" aria-label="VenomSnake Detector - home">
+          <img src="/favicon.svg" alt="" width={36} height={36} className="transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" />
+          <span className="whitespace-nowrap font-serif text-[22px] font-semibold leading-none tracking-tight text-ink">
+            VenomSnake<span className="hidden text-brand-700 sm:inline xl:hidden 2xl:inline"> Detector</span>
           </span>
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-0.5 xl:flex">
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} className={linkClass}>
               {l.label}
@@ -69,8 +77,8 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <LanguageSelect className="hidden sm:block" />
-          <Link to="/emergency" className="btn btn-danger btn-sm hidden sm:inline-flex">
+          <LanguageSelect className="hidden shrink-0 sm:block" />
+          <Link to="/emergency" className="btn btn-danger btn-sm hidden whitespace-nowrap sm:inline-flex">
             <Siren size={16} aria-hidden /> {t('cta_get_help')}
           </Link>
           <button
@@ -79,7 +87,7 @@ export function Header() {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="grid h-11 w-11 place-items-center rounded-full border border-line bg-white text-ink lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-full border border-line bg-white text-ink xl:hidden"
           >
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -87,7 +95,7 @@ export function Header() {
       </div>
 
       {open && (
-        <div id="mobile-menu" className="border-t border-line bg-paper lg:hidden">
+        <div id="mobile-menu" className="border-t border-line bg-paper xl:hidden">
           <nav aria-label="Mobile" className="container-x flex flex-col gap-1 py-4">
             {links.map((l) => (
               <NavLink key={l.to} to={l.to} className={({ isActive }) => cn(linkClass({ isActive }), 'py-3 text-base')}>

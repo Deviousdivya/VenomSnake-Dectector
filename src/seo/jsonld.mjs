@@ -60,6 +60,18 @@ export function buildJsonLd(data, path) {
     });
   }
 
+  if (path === "/big-four") {
+    graph.push({
+      "@type": "Article",
+      headline: page.h1,
+      description: page.description,
+      url,
+      inLanguage: "en",
+      about: { "@type": "MedicalCondition", name: "Snakebite envenoming" },
+      publisher: { "@id": `${site.url}/#org` },
+    });
+  }
+
   if (path !== "/") {
     graph.push({
       "@type": "BreadcrumbList",

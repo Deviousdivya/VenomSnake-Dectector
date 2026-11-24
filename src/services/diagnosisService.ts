@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { DiagnosisResult } from "../types";
+import { localTriage } from "./localTriage";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -18,7 +19,8 @@ const DIAGNOSIS_SCHEMA = {
 export async function analyzeSymptoms(
   biteLocation: string, 
   symptoms: string[], 
-  languageName: string = "English"
+  languageName: string = "English",
+  symptomIds: string[] = []
 ): Promise<DiagnosisResult> {
   // Performance Check: Client-side Caching
   const symptomsKey = symptoms.sort().join('_');
@@ -31,8 +33,8 @@ export async function analyzeSymptoms(
   }
 
   if (!process.env.GEMINI_API_KEY) {
-    console.error("GEMINI_API_KEY is not configured.");
-    throw new Error("The symptom summary is temporarily unavailable. Please try again later.");
+    console.error("GEMINI_API_KEY is not configured - using built-in guidance.");
+    return localTriage(biteLocation, symptomIds, symptoms);
   }
 
   try {
@@ -65,11 +67,9 @@ export async function analyzeSymptoms(
     return result;
   } catch (error: any) {
     console.error('AI Diagnosis Error:', error);
-    let userMessage = "We couldn't generate the summary. Check your connection and try again.";
-    if (error.message?.includes("expired") || error.message?.includes("API key")) {
-      console.error("Gemini API key is expired or invalid - renew GEMINI_API_KEY.");
-      userMessage = "The symptom summary is temporarily unavailable. Please try again later.";
-    }
-    throw new Error(userMessage);
+    // The AI is unavailable (quota used up, key problem or no internet): never leave the person with nothing -
+    // fall back to the built-in, cautious guidance.
+    console.error("Gemini unavailable - using built-in guidance.", error?.message);
+    return localTriage(biteLocation, symptomIds, symptoms);
   }
 }

@@ -13,6 +13,7 @@ AI-assisted snake identification and snakebite help for India. Upload a photo to
 | **Identify** (`/identify`) | Upload or capture a photo → species, venomous / non-venomous / unknown, precautions and emergency steps. For venomous snakes it also shows call buttons, AI-suggested antivenom and contacts (clearly marked *verify*), and the **nearest hospitals** for your location. |
 | **Symptom checker** (`/symptom-checker`) | No photo? Tap the bite site on a body diagram, tick symptoms, get a plain-language summary and a **PDF** to show a doctor. |
 | **Emergency** (`/emergency`) | Call 108 / 112, first-aid steps and a "do not" list, share your GPS location (share sheet / SMS), request wildlife rescue by SMS, find nearby hospitals. |
+| **Big Four** (`/big-four`) | Field guide to India's four most dangerous snakes: how to recognise them, their venom, habits and warnings. |
 | **Insights** (`/insights`) | Trusted WHO and NCDC (India) guidance, plus live news when a NewsAPI key is configured. |
 | About, Privacy, Terms | How it works and its limits, what data is used, medical disclaimer. |
 
@@ -20,7 +21,7 @@ Also: English and Hindi interface (AI answers in the chosen language), installab
 
 ## Tech stack
 
-React 19 · TypeScript · Vite 6 · Tailwind CSS 4 · React Router 7 · Google Gemini (`@google/genai`) · Express (API) · OpenStreetMap Overpass (hospitals) · jsPDF · vite-plugin-pwa · deployed on Vercel.
+Fraunces + Manrope type · React 19 · TypeScript · Vite 6 · Tailwind CSS 4 · React Router 7 · Google Gemini (`@google/genai`) · Express (API) · OpenStreetMap Overpass (hospitals) · jsPDF · vite-plugin-pwa · deployed on Vercel.
 
 ## Getting started
 
@@ -77,9 +78,14 @@ src/seo/                 page metadata + JSON-LD
 src/locales/             translations (English complete; Hindi for core screens; others partial)
 ```
 
+## Identification engine
+
+Gemini is the identifier. A free ML model (SnakeCLEF baseline) was evaluated as a replacement and **rejected**: it flagged only 66% of dangerous snakes as dangerous. Details, numbers and the alternatives (paid tier, a purpose-trained Indian-species model) are in [`docs/identification-model-evaluation.md`](docs/identification-model-evaluation.md). When the AI is unavailable (e.g. free quota used up) the app falls back to built-in guidance instead of failing.
+
 ## Roadmap
 
 * **Move the Gemini calls to the server.** `vite.config.ts` currently inlines `GEMINI_API_KEY` into the public JavaScript. Until that changes, restrict the key to this site's domain and set a spend limit.
+* Enable billing on the Gemini key (removes free-tier limits), or train an Indian-species model that passes a ≥95% dangerous-snake recall test.
 * Re-check model names (`gemini-3.1-flash-lite-preview` is a preview model) and verify end-to-end with a fresh key.
 * Medical review of first-aid wording and of the translated emergency steps.
 * Complete the remaining Indian-language translations with native speakers.

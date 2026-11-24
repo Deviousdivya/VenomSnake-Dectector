@@ -20,6 +20,7 @@ const SymptomChecker = lazy(() => import('./pages/SymptomChecker'));
 const Emergency = lazy(() => import('./pages/Emergency'));
 const Insights = lazy(() => import('./pages/Insights'));
 const About = lazy(() => import('./pages/About'));
+const BigFour = lazy(() => import('./pages/BigFour'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Privacy = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Terms })));
@@ -91,6 +92,7 @@ function Loading() {
 
 function Shell() {
   const mainRef = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -104,17 +106,20 @@ function Shell() {
       <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 outline-none">
         <RouteEffects mainRef={mainRef} />
         <Suspense fallback={<Loading />}>
+          <div key={pathname} className="page-enter">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/identify" element={<Identify />} />
             <Route path="/symptom-checker" element={<SymptomChecker />} />
             <Route path="/emergency" element={<Emergency />} />
             <Route path="/insights" element={<Insights />} />
+            <Route path="/big-four" element={<BigFour />} />
             <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </div>
         </Suspense>
       </main>
       <Footer />
