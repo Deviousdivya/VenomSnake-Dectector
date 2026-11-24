@@ -92,6 +92,64 @@ const OVERPASS_ENDPOINTS = [
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 
+const UA = 'VenomSnakeDetector/1.0 (+https://venom-snake-dectector.vercel.app; snakebite help app)';
+
+// Source 1: Overpass (richest data: phone, operator, emergency dept.). Public servers are tried in turn.
+async function hospitalsFromOverpass(q: string): Promise<any[]> {
+  let last: unknown;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 9000);
+      const upstream = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': '*/*', 'User-Agent': UA },
+        body: 'data=' + encodeURIComponent(q),
+        signal: ctrl.signal,
+      }).finally(() => clearTimeout(timer));
+      if (!upstream.ok) throw new Error(`Overpass ${upstream.status}`);
+      const data: any = await upstream.json();
+      return data.elements ?? [];
+    } catch (e) {
+      last = e;
+      console.warn(`Overpass lookup failed at ${url}:`, (e as Error).message);
+    }
+  }
+  throw last ?? new Error('Overpass unavailable');
+}
+
+// Source 2: Nominatim (OpenStreetMap's search). Fewer details but fast and reliable; results are reshaped to look like Overpass elements.
+async function hospitalsFromNominatim(lat: number, lng: number, radiusM: number): Promise<any[]> {
+  const search = async (rad: number): Promise<any[]> => {
+    const dLat = rad / 111000;
+    const dLng = rad / (111000 * Math.max(Math.cos((lat * Math.PI) / 180), 0.2));
+    const url =
+      `https://nominatim.openstreetmap.org/search?amenity=hospital&bounded=1&format=jsonv2&limit=40&extratags=1` +
+      `&viewbox=${lng - dLng},${lat + dLat},${lng + dLng},${lat - dLat}`;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      const upstream = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, signal: ctrl.signal });
+      if (!upstream.ok) throw new Error(`Nominatim ${upstream.status}`);
+      const rows: any[] = await upstream.json();
+      return rows.map((x) => ({
+        type: 'node',
+        id: x.place_id,
+        lat: parseFloat(x.lat),
+        lon: parseFloat(x.lon),
+        tags: { ...(x.extratags ?? {}), name: x.name || String(x.display_name ?? '').split(',')[0] },
+      }));
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  // Nominatim ranks by importance, not distance: search a tight area first so the truly nearest hospitals are included in a dense city,
+  // and only widen the area when few are found (rural).
+  let found = await search(Math.min(radiusM, 6000));
+  if (found.length < 3 && radiusM > 6000) found = await search(radiusM);
+  return found;
+}
+
 app.post('/api/hospitals', async (req, res) => {
   const { lat, lng, radius } = req.body ?? {};
   if (
@@ -106,29 +164,15 @@ app.post('/api/hospitals', async (req, res) => {
   if (hit) return res.json({ elements: hit, cached: true });
 
   const q = `[out:json][timeout:20];(node["amenity"="hospital"](around:${r},${lat},${lng});way["amenity"="hospital"](around:${r},${lat},${lng}););out center tags 40;`;
-  for (const url of OVERPASS_ENDPOINTS) {
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 9000);
-      const upstream = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': '*/*',
-          'User-Agent': 'VenomSnakeDetector/1.0 (+https://venom-snake-dectector.vercel.app; snakebite help app)',
-        },
-        body: 'data=' + encodeURIComponent(q),
-        signal: ctrl.signal,
-      }).finally(() => clearTimeout(timer));
-      if (!upstream.ok) throw new Error(`Overpass ${upstream.status}`);
-      const data: any = await upstream.json();
-      hospitalCache.set(key, data.elements ?? []);
-      return res.json({ elements: data.elements ?? [] });
-    } catch (e) {
-      console.warn(`Overpass lookup failed at ${url}:`, (e as Error).message);
-    }
+  try {
+    // In an emergency, speed matters: whichever source answers first wins.
+    const elements = await Promise.any([hospitalsFromOverpass(q), hospitalsFromNominatim(lat, lng, r)]);
+    hospitalCache.set(key, elements);
+    return res.json({ elements });
+  } catch (e) {
+    console.warn('All hospital sources failed');
+    return res.status(502).json({ error: 'Hospital lookup is unavailable right now.' });
   }
-  res.status(502).json({ error: 'Hospital lookup is unavailable right now.' });
 });
 
 app.get('/api/health', (req, res) => {
