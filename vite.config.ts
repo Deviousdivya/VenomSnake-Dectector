@@ -8,48 +8,42 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [
-      react(), 
+      react(),
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+        includeAssets: ['favicon.svg', 'favicon-32.png', 'apple-touch-icon.png', 'robots.txt'],
         manifest: {
+          id: '/',
           name: 'VenomSnake Detector',
           short_name: 'VenomSnake',
-          description: 'High-speed snake species identification for rural safety.',
-          theme_color: '#0a0a0a',
-          background_color: '#0a0a0a',
+          description: 'Identify a snake from a photo and find snakebite help: nearest hospitals, emergency contacts and first aid.',
+          lang: 'en',
+          start_url: '/',
+          scope: '/',
+          display: 'standalone',
+          orientation: 'portrait',
+          theme_color: '#14614d',
+          background_color: '#f6f7f2',
+          categories: ['health', 'medical', 'education'],
           icons: [
-            {
-              src: 'https://picsum.photos/seed/snake-icon/192/192',
-              sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: 'https://picsum.photos/seed/snake-icon/512/512',
-              sizes: '512x512',
-              type: 'image/png'
-            }
-          ]
+            { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+            { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          ],
+          shortcuts: [
+            { name: 'Identify a snake', url: '/identify', icons: [{ src: '/icon-192.png', sizes: '192x192' }] },
+            { name: 'Snakebite emergency', url: '/emergency', icons: [{ src: '/icon-192.png', sizes: '192x192' }] },
+          ],
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        }
-      })
+          navigateFallbackDenylist: [/^\/api\//],
+        },
+      }),
     ],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || ""),
-    },
-    build: {
-      chunkSizeWarningLimit: 2000,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
-            'vendor-ui': ['lucide-react', 'motion', 'react', 'react-dom'],
-          }
-        }
-      }
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''),
     },
     resolve: {
       alias: {

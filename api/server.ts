@@ -33,17 +33,22 @@ app.use('/api/', limiter);
 
 // -- 📡 4. GLOBAL INTEL & SIGHTINGS --
 app.post('/api/sightings', async (req, res) => {
-  const { species, location } = req.body;
+  const { species, location } = req.body ?? {};
+  // Validate input: a missing or malformed body used to throw here and crash the request.
+  if (
+    typeof species !== 'string' || species.length === 0 || species.length > 120 ||
+    typeof location?.lat !== 'number' || typeof location?.lng !== 'number' ||
+    Math.abs(location.lat) > 90 || Math.abs(location.lng) > 180
+  ) {
+    return res.status(400).json({ error: 'A species name and valid coordinates are required.' });
+  }
   console.log(`[Bio-Sighting] ${species} detected at ${location.lat}, ${location.lng}`);
-  res.json({ status: 'Uplinked' });
+  res.json({ status: 'recorded' });
 });
 
 app.get('/api/news', async (req, res) => {
-  const fallbackNews = [
-    { id: 'f1', title: 'WHO Launches New Snakebite Management Guidelines', excerpt: 'Global protocols updated for 2026 to include AI detection standards.', date: 'Apr 19, 2026', category: 'Health', imageUrl: 'https://picsum.photos/seed/who/800/600' },
-    { id: 'f2', title: 'Antivenom Synthesis Reaches 98% Efficiency in Labs', excerpt: 'New synthetic production methods promise to end supply shortages.', date: 'Apr 18, 2026', category: 'Research', imageUrl: 'https://picsum.photos/seed/lab/800/600' },
-    { id: 'f3', title: 'Rural Clinics Get Solar-Powered Antivenom Fridges', excerpt: 'Technology enabling lifesaving storage in remote areas without electricity.', date: 'Apr 17, 2026', category: 'Tech', imageUrl: 'https://picsum.photos/seed/tech/800/600' }
-  ];
+  // No made-up headlines: when no live news is available the site shows trusted resource links instead.
+  const fallbackNews: any[] = [];
 
   const apiKey = process.env.NEWS_API_KEY;
   if (!apiKey) {
@@ -59,7 +64,7 @@ app.get('/api/news', async (req, res) => {
         id: idx.toString(),
         title: art.title,
         excerpt: art.description,
-        imageUrl: art.urlToImage || `https://picsum.photos/seed/${idx}/800/600`,
+        imageUrl: art.urlToImage || undefined,
         url: art.url,
         category: 'Field Report', // NEWSAPI doesn't provide this, so we tag it
         date: new Date(art.publishedAt).toLocaleDateString()
@@ -73,6 +78,57 @@ app.get('/api/news', async (req, res) => {
     console.error("News sync failed", error);
     res.json({ articles: fallbackNews, status: 'fallback' });
   }
+});
+
+// -- 🏥 NEARBY HOSPITALS (OpenStreetMap Overpass) --
+// Done on the server so the request carries an identifying User-Agent (the Overpass operators ask for one and rate-limit
+// anonymous traffic), results are cached, and coordinates travel in a POST body rather than a loggable URL.
+const hospitalCache = new NodeCache({ stdTTL: 6 * 3600, checkperiod: 600 });
+// Public Overpass servers are best-effort and sometimes slow or unavailable, so several are tried in turn.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
+app.post('/api/hospitals', async (req, res) => {
+  const { lat, lng, radius } = req.body ?? {};
+  if (
+    typeof lat !== 'number' || typeof lng !== 'number' ||
+    !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180
+  ) {
+    return res.status(400).json({ error: 'Valid coordinates are required.' });
+  }
+  const r = radius === 50000 ? 50000 : 15000;
+  const key = `${lat.toFixed(3)},${lng.toFixed(3)},${r}`; // ~100 m grid: nearby requests share one lookup
+  const hit = hospitalCache.get<any[]>(key);
+  if (hit) return res.json({ elements: hit, cached: true });
+
+  const q = `[out:json][timeout:20];(node["amenity"="hospital"](around:${r},${lat},${lng});way["amenity"="hospital"](around:${r},${lat},${lng}););out center tags 40;`;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 9000);
+      const upstream = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': '*/*',
+          'User-Agent': 'VenomSnakeDetector/1.0 (+https://venom-snake-dectector.vercel.app; snakebite help app)',
+        },
+        body: 'data=' + encodeURIComponent(q),
+        signal: ctrl.signal,
+      }).finally(() => clearTimeout(timer));
+      if (!upstream.ok) throw new Error(`Overpass ${upstream.status}`);
+      const data: any = await upstream.json();
+      hospitalCache.set(key, data.elements ?? []);
+      return res.json({ elements: data.elements ?? [] });
+    } catch (e) {
+      console.warn(`Overpass lookup failed at ${url}:`, (e as Error).message);
+    }
+  }
+  res.status(502).json({ error: 'Hospital lookup is unavailable right now.' });
 });
 
 app.get('/api/health', (req, res) => {

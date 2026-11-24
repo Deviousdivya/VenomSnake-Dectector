@@ -18,7 +18,8 @@ export interface NewsItem {
   excerpt: string;
   date: string;
   category: string;
-  imageUrl: string;
+  imageUrl?: string;
+  url?: string;
 }
 
 export interface DiagnosisResult {

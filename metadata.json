@@ -1,6 +1,6 @@
 {
   "name": "VenomSnake Detector",
-  "description": "A high-end platform for snake species identification, safety protocols, and real-time emergency assistance using AI and 3D visualization.",
+  "description": "AI-assisted snake identification and snakebite help: venomous or not, nearest hospitals, emergency contacts, first aid and a symptom checker.",
   "requestFramePermissions": [
     "camera",
     "geolocation"

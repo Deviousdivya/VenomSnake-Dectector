@@ -19,10 +19,23 @@ const DETECTION_SCHEMA = {
   required: ['commonName', 'scientificName', 'riskLevel', 'description', 'precautions', 'emergencySteps', 'antidoteInfo', 'rescueContacts', 'medicalFacility']
 };
 
+// Fingerprint of the WHOLE image. (The cache key used to be only the first 100 characters of the data, which for a
+// JPEG is just the file header - identical for every photo - so a second scan returned the first snake's result.)
+function hashString(s: string): string {
+  let h1 = 0x811c9dc5;
+  let h2 = 5381;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 16777619);
+    h2 = (Math.imul(h2, 33) + c) | 0;
+  }
+  return `${(h1 >>> 0).toString(36)}${(h2 >>> 0).toString(36)}${s.length.toString(36)}`;
+}
+
 export async function detectSnake(base64Image: string, mimeType: string, languageName: string = "English", userLocation?: string): Promise<DetectionResult> {
   // 1. Performance Check: Client-side Caching
   const dataOnly = base64Image.split(',')[1] || base64Image;
-  const cacheKey = `detect_${dataOnly.slice(0, 100)}_${languageName}`;
+  const cacheKey = `detect_${hashString(dataOnly)}_${languageName}`;
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     console.log("[Cache Hit] Serving cached bio-scan data.");
@@ -30,7 +43,8 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
   }
 
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in environment variables.");
+    console.error("GEMINI_API_KEY is not configured.");
+    throw new Error("Identification is temporarily unavailable. Please try again later.");
   }
 
   try {
@@ -54,7 +68,7 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
       }
     });
 
-    if (!response.text) throw new Error("Bio-scan returned no data.");
+    if (!response.text) throw new Error("No result came back. Please try again with a clearer photo.");
     const result = JSON.parse(response.text);
     
     // Save to cache for fast recurring answers
@@ -63,9 +77,11 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
     return result;
   } catch (error: any) {
     console.error('AI Detection Error:', error);
-    let userMessage = "Satellite link unstable. Scan aborted.";
+    let userMessage = "We couldn't complete the identification. Check your connection and try again.";
     if (error.message?.includes("expired") || error.message?.includes("API key")) {
-      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in settings.";
+      // details stay in the console - visitors only see a neutral message
+      console.error("Gemini API key is expired or invalid - renew GEMINI_API_KEY.");
+      userMessage = "Identification is temporarily unavailable. Please try again later.";
     }
     throw new Error(userMessage);
   }

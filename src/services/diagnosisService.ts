@@ -31,7 +31,8 @@ export async function analyzeSymptoms(
   }
 
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Bio-Core API Key missing. Please configure GEMINI_API_KEY in settings.");
+    console.error("GEMINI_API_KEY is not configured.");
+    throw new Error("The symptom summary is temporarily unavailable. Please try again later.");
   }
 
   try {
@@ -64,9 +65,10 @@ export async function analyzeSymptoms(
     return result;
   } catch (error: any) {
     console.error('AI Diagnosis Error:', error);
-    let userMessage = error.message || "Triage link failed.";
+    let userMessage = "We couldn't generate the summary. Check your connection and try again.";
     if (error.message?.includes("expired") || error.message?.includes("API key")) {
-      userMessage = "BIO-CORE CRITICAL: Your API Key has expired or is invalid. Please renew GEMINI_API_KEY in settings.";
+      console.error("Gemini API key is expired or invalid - renew GEMINI_API_KEY.");
+      userMessage = "The symptom summary is temporarily unavailable. Please try again later.";
     }
     throw new Error(userMessage);
   }

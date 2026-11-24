@@ -1,0 +1,245 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useDropzone } from 'react-dropzone';
+import { Camera, CircleAlert, ImagePlus, Info, Loader2, ScanSearch, Siren, Trash2 } from 'lucide-react';
+import { Seo } from '../seo/Seo';
+import { useLanguage } from '../context/LanguageContext';
+import { detectSnake } from '../services/geminiService';
+import { compressImage } from '../utils/imageCompressor';
+import { Coords, getCoords, readAsDataURL } from '../lib/geo';
+import { DetectionResult } from '../types';
+import { cn } from '../lib/utils';
+import { CameraCapture } from '../components/CameraCapture';
+import { SnakeResult } from '../components/SnakeResult';
+
+type Phase = 'idle' | 'locating' | 'optimizing' | 'analyzing';
+
+const phaseText: Record<Exclude<Phase, 'idle'>, string> = {
+  locating: 'Checking your location…',
+  optimizing: 'Preparing your photo…',
+  analyzing: 'Identifying the snake…',
+};
+
+export default function Identify() {
+  const { t, languageName } = useLanguage();
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [result, setResult] = useState<DetectionResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const outRef = useRef<HTMLDivElement>(null);
+  const busy = phase !== 'idle';
+
+  const setPhoto = useCallback((f: File) => {
+    setPreview((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return URL.createObjectURL(f);
+    });
+    setFile(f);
+    setResult(null);
+    setError(null);
+  }, []);
+
+  const onDrop = useCallback(
+    (files: File[]) => {
+      if (files[0]) setPhoto(files[0]);
+    },
+    [setPhoto]
+  );
+
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    onDrop,
+    accept: { 'image/*': [] },
+    multiple: false,
+    noClick: true,
+    noKeyboard: true,
+    disabled: busy,
+  });
+
+  const removePhoto = () => {
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(null);
+    setFile(null);
+    setResult(null);
+    setError(null);
+  };
+
+  const onCameraCapture = async (dataUrl: string) => {
+    const blob = await (await fetch(dataUrl)).blob();
+    setPhoto(new File([blob], 'capture.jpg', { type: 'image/jpeg' }));
+  };
+
+  const handleScan = async () => {
+    if (!file || busy) return;
+    setError(null);
+    setResult(null);
+
+    // Location makes the rescue and hospital suggestions relevant. It is optional - the scan continues without it.
+    setPhase('locating');
+    let locationStr = 'Unknown';
+    try {
+      const c = await getCoords(8000);
+      setCoords(c);
+      locationStr = `${c.lat}, ${c.lng}`;
+    } catch {
+      /* no location: general results */
+    }
+
+    try {
+      const full = await readAsDataURL(file);
+      setPhase('optimizing');
+      const compressed = await compressImage(full);
+      setPhase('analyzing');
+      const res = await detectSnake(compressed, 'image/jpeg', languageName, locationStr);
+      setResult(res);
+      localStorage.setItem(`snake_scan_${Date.now()}`, JSON.stringify(res));
+    } catch (e: any) {
+      setError(e?.message || 'We could not complete the identification. Please try again.');
+    } finally {
+      setPhase('idle');
+    }
+  };
+
+  useEffect(() => {
+    if (result || error) outRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [result, error]);
+
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <>
+      <Seo path="/identify" />
+      <div className="container-x py-12 sm:py-16">
+        <header className="max-w-3xl">
+          <p className="eyebrow">AI snake identification</p>
+          <h1 className="h-section mt-3 sm:!text-5xl">{t('scan_title')}</h1>
+          <p className="lead mt-4">{t('scan_intro')}</p>
+        </header>
+
+        <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,26rem)_1fr]">
+          {/* Upload */}
+          <div className="space-y-5 lg:sticky lg:top-24">
+            <div
+              {...getRootProps()}
+              className={cn(
+                'relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed bg-white p-6 text-center transition',
+                isDragActive ? 'border-brand-600 bg-brand-50' : 'border-brand-200',
+                preview && 'border-solid border-line'
+              )}
+            >
+              <input {...getInputProps()} aria-label="Upload a photo of the snake" />
+              {preview ? (
+                <img src={preview} alt="The photo you selected" className="absolute inset-0 h-full w-full object-cover" />
+              ) : (
+                <div className="space-y-4">
+                  <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-100 text-brand-700">
+                    <ImagePlus size={30} aria-hidden />
+                  </span>
+                  <div>
+                    <p className="font-serif text-2xl font-semibold">{t('dropzone_title')}</p>
+                    <p className="mt-1 text-sm text-muted">{t('dropzone_subtitle')}</p>
+                  </div>
+                </div>
+              )}
+              {isDragActive && (
+                <div className="absolute inset-0 grid place-items-center bg-brand-700/85 text-xl font-semibold text-white">Drop the photo here</div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={open} disabled={busy} className="btn btn-outline !px-3 whitespace-nowrap">
+                <ImagePlus size={18} aria-hidden /> {preview ? 'Change photo' : 'Choose photo'}
+              </button>
+              <button type="button" onClick={() => setCameraOpen(true)} disabled={busy} className="btn btn-outline !px-3 whitespace-nowrap">
+                <Camera size={18} aria-hidden /> {t('btn_camera')}
+              </button>
+            </div>
+
+            <button type="button" onClick={handleScan} disabled={!file || busy} className="btn btn-primary w-full !py-4 text-base">
+              {busy ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" aria-hidden /> {phaseText[phase as Exclude<Phase, 'idle'>]}
+                </>
+              ) : (
+                <>
+                  <ScanSearch size={20} aria-hidden /> {t('btn_analyze')}
+                </>
+              )}
+            </button>
+
+            {preview && !busy && (
+              <button type="button" onClick={removePhoto} className="btn btn-ghost btn-sm w-full">
+                <Trash2 size={16} aria-hidden /> {t('btn_remove')}
+              </button>
+            )}
+
+            <ul className="space-y-2 rounded-2xl bg-white p-5 text-sm text-ink-2 ring-1 ring-line">
+              <li className="font-semibold text-ink">For the best result</li>
+              <li>• Stay at least 2 metres away — never touch the snake.</li>
+              <li>• Show the whole body and the head, in good light.</li>
+              <li>• Avoid blurry, zoomed-in or very dark photos.</li>
+            </ul>
+            <p className="flex gap-2 text-xs text-muted">
+              <Info size={14} className="mt-0.5 shrink-0" aria-hidden />
+              We ask for your location to tailor rescue and hospital suggestions. It is only used for this scan and you can decline.
+            </p>
+          </div>
+
+          {/* Output */}
+          <div ref={outRef} className="min-w-0 scroll-mt-24" aria-live="polite">
+            {!result && !error && !busy && (
+              <div className="card flex min-h-[320px] flex-col items-center justify-center gap-4 p-10 text-center">
+                <span className="grid h-16 w-16 place-items-center rounded-full bg-paper text-brand-700 ring-1 ring-line">
+                  <ScanSearch size={28} aria-hidden />
+                </span>
+                <h2 className="text-2xl">Your result will appear here</h2>
+                <p className="max-w-sm text-ink-2">Add a photo and press “{t('btn_analyze')}”. You will see the species, whether it is venomous, and what to do.</p>
+              </div>
+            )}
+
+            {busy && (
+              <div className="card flex min-h-[320px] flex-col items-center justify-center gap-6 p-10 text-center" role="status">
+                <Loader2 size={44} className="animate-spin text-brand-700" aria-hidden />
+                <div>
+                  <h2 className="text-2xl">{phaseText[phase as Exclude<Phase, 'idle'>]}</h2>
+                  <p className="mt-2 text-ink-2">This usually takes a few seconds.</p>
+                </div>
+                <div className="h-1.5 w-56 overflow-hidden rounded-full bg-brand-100">
+                  <div className="sweep h-full w-1/3 rounded-full bg-brand-600" />
+                </div>
+              </div>
+            )}
+
+            {error && !busy && (
+              <div className="card border-warn-600/40 p-8" role="alert">
+                <p className="flex items-center gap-2 text-lg font-bold text-warn-600">
+                  <CircleAlert size={22} aria-hidden /> We couldn't identify this snake
+                </p>
+                <p className="mt-3 text-ink-2">{error}</p>
+                <div className="mt-6 rounded-2xl border border-danger-600/25 bg-danger-50 p-5">
+                  <p className="flex items-center gap-2 font-bold text-danger-700">
+                    <Siren size={18} aria-hidden /> Has someone been bitten?
+                  </p>
+                  <p className="mt-1 text-sm text-ink-2">Don't wait for a result. Call for help now.</p>
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <a href="tel:108" className="btn btn-danger btn-sm">Call 108</a>
+                    <Link to="/emergency" className="btn btn-outline-danger btn-sm">First aid &amp; nearby hospitals</Link>
+                  </div>
+                </div>
+                <button type="button" onClick={handleScan} disabled={!file} className="btn btn-outline btn-sm mt-5">
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {result && !busy && <SnakeResult result={result} coords={coords} onCoords={setCoords} />}
+          </div>
+        </div>
+      </div>
+
+      {cameraOpen && <CameraCapture onCapture={onCameraCapture} onClose={() => setCameraOpen(false)} />}
+    </>
+  );
+}

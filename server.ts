@@ -3,7 +3,7 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

@@ -1,0 +1,113 @@
+{
+  "site": {
+    "url": "https://venom-snake-dectector.vercel.app",
+    "name": "VenomSnake Detector",
+    "locale": "en_IN",
+    "image": "/og-image.png",
+    "imageAlt": "VenomSnake Detector - identify a snake and find snakebite help"
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "VenomSnake Detector | Snake Identification & Snakebite Help",
+      "description": "Identify a snake from a photo, see if it is venomous, and find nearby hospitals and emergency contacts. AI-assisted snakebite safety built for India.",
+      "h1": "Identify a snake. Know the risk. Find help fast.",
+      "summary": "Upload a photo to identify a snake species, check whether it is venomous and, if it is, see the nearest hospitals and emergency contacts for your location. If someone has been bitten, call 108 first.",
+      "changefreq": "weekly",
+      "priority": "1.0"
+    },
+    {
+      "path": "/identify",
+      "title": "Identify a Snake from a Photo | VenomSnake Detector",
+      "description": "Upload or capture a photo to identify a snake species, check whether it is venomous, and get precautions, nearby hospitals and rescue contacts.",
+      "h1": "Identify a snake from a photo",
+      "summary": "Take a clear photo from a safe distance, upload it, and get an AI-assisted identification with precautions. For venomous snakes you also get nearby hospitals and emergency contacts.",
+      "changefreq": "monthly",
+      "priority": "0.9"
+    },
+    {
+      "path": "/symptom-checker",
+      "title": "Snakebite Symptom Checker & Doctor Report | VenomSnake",
+      "description": "No photo of the snake? Mark the bite site, tick your symptoms and get a plain-language summary and a PDF to show your doctor. Not a diagnosis.",
+      "h1": "Snakebite symptom checker",
+      "summary": "Select where the bite is and which symptoms you have to get a plain-language summary of the likely venom effect and a PDF briefing for your doctor. It is guidance, not a diagnosis.",
+      "changefreq": "monthly",
+      "priority": "0.8"
+    },
+    {
+      "path": "/emergency",
+      "title": "Snakebite First Aid & Emergency Numbers (India) | VenomSnake",
+      "description": "Bitten by a snake? Call 108, keep still, and get to a hospital fast. Step-by-step first aid, what not to do, and the nearest hospitals to your location.",
+      "h1": "Bitten by a snake? Act now.",
+      "summary": "Call 108 or 112 immediately, keep the person calm and the bitten limb still, remove rings and tight items, and get to a hospital. Do not cut the bite, suck out venom, or tie a tight tourniquet.",
+      "changefreq": "monthly",
+      "priority": "0.9"
+    },
+    {
+      "path": "/insights",
+      "title": "Snakebite Safety Insights & Trusted Resources | VenomSnake",
+      "description": "Trusted snakebite guidance from the WHO and India's Ministry of Health, plus the latest snakebite and antivenom news.",
+      "h1": "Snakebite insights and trusted resources",
+      "summary": "Guidance on snakebite prevention and treatment from the World Health Organization and India's National Centre for Disease Control, plus recent snakebite and antivenom news.",
+      "changefreq": "daily",
+      "priority": "0.6"
+    },
+    {
+      "path": "/about",
+      "title": "About VenomSnake Detector | How It Works & Its Limits",
+      "description": "How VenomSnake Detector identifies snakes, where hospital data comes from, and what the AI can and cannot do.",
+      "h1": "About VenomSnake Detector",
+      "summary": "How the snake identification works, where the hospital information comes from, and the limits of an AI-assisted tool.",
+      "changefreq": "yearly",
+      "priority": "0.4"
+    },
+    {
+      "path": "/privacy",
+      "title": "Privacy Policy | VenomSnake Detector",
+      "description": "What VenomSnake Detector does with your photos, location and browser data.",
+      "h1": "Privacy Policy",
+      "summary": "What happens to the photos you scan, the location you share and the data stored in your browser.",
+      "changefreq": "yearly",
+      "priority": "0.3"
+    },
+    {
+      "path": "/terms",
+      "title": "Terms of Use & Medical Disclaimer | VenomSnake Detector",
+      "description": "Terms of use and the medical disclaimer for VenomSnake Detector. It is an information tool, not medical advice.",
+      "h1": "Terms of Use & Medical Disclaimer",
+      "summary": "VenomSnake Detector is an information tool and does not replace professional medical care. In an emergency call 108 or 112.",
+      "changefreq": "yearly",
+      "priority": "0.3"
+    }
+  ],
+  "faq": [
+    {
+      "q": "Can any snake be identified from a photo?",
+      "a": "Photo identification works best with a clear, well-lit picture of the whole snake taken from a safe distance (at least two metres). Blurry, dark or partial photos reduce accuracy, and some species look very alike. Treat every result as a guide, not a guarantee."
+    },
+    {
+      "q": "How accurate is the identification?",
+      "a": "It can be wrong. The result comes from an AI model, not a herpetologist, and no accuracy figure is claimed. If a snake has bitten someone, treat it as an emergency whatever the result says."
+    },
+    {
+      "q": "What should I do if someone has been bitten?",
+      "a": "Call 108 (ambulance) or 112 straight away, keep the person calm and the bitten limb still, remove rings and tight items, and go to a hospital. Do not cut the bite, suck out venom, tie a tight tourniquet or use herbal remedies."
+    },
+    {
+      "q": "Should I catch or kill the snake so doctors can see it?",
+      "a": "No. Trying to catch or kill the snake leads to more bites. If it is safe, take a photo from a distance. Doctors treat according to the symptoms, so a photo helps but is not required."
+    },
+    {
+      "q": "Does the app show where antivenom is in stock?",
+      "a": "No app can guarantee live stock. After a venomous result, VenomSnake lists the nearest hospitals from OpenStreetMap data, with phone numbers where available. Call ahead to confirm, or call 108, as ambulance crews often know which nearby hospital treats snakebite."
+    },
+    {
+      "q": "Is my photo saved?",
+      "a": "Photos are sent to Google's Gemini AI to be analysed and are not stored by VenomSnake. Google's own policies apply to data sent to its API. Results are saved only in your own browser so you can revisit them."
+    },
+    {
+      "q": "Which languages are supported?",
+      "a": "The interface is available in English and Hindi, with partial support for several other Indian languages. AI results are written in the language you select."
+    }
+  ]
+}

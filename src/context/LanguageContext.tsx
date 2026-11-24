@@ -20,6 +20,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('language', lang);
   };
 
+  // keep <html lang> in step with the chosen language (screen readers, translation tools, SEO)
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const t = (key: keyof typeof translations['en']): string => {
     const langDict = translations[language] || translations['en'];
     // Fallback if key missing in target language
