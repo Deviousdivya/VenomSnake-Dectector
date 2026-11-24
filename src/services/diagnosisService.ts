@@ -1,3 +1,4 @@
+import { generateWithFallback } from "./geminiFallback";
 import { GoogleGenAI, Type } from "@google/genai";
 import { DiagnosisResult } from "../types";
 import { localTriage } from "./localTriage";
@@ -38,7 +39,7 @@ export async function analyzeSymptoms(
   }
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithFallback(ai, {
       model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [{

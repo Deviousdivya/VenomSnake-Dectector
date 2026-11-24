@@ -1,3 +1,4 @@
+import { generateWithFallback } from "./geminiFallback";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { DetectionResult } from "../types";
 
@@ -58,7 +59,7 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
   }
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithFallback(ai, {
       model: "gemini-3.1-flash-lite-preview",
       contents: [{
         parts: [
