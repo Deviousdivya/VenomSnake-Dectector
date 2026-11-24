@@ -27,6 +27,7 @@ export interface LocalPrediction {
   maxLogit: number; // how strongly the base model recognised *any* snake (low = unfamiliar / unclear photo)
 }
 
+let engineReady = false;
 let enginePromise: Promise<{ ort: any; session: any; head: Head }> | null = null;
 
 async function fetchWithProgress(url: string, onProgress?: (f: number) => void): Promise<Uint8Array> {
@@ -66,6 +67,9 @@ export function loadEngine(onProgress?: (fraction: number) => void) {
         }),
       ]);
       const session = await ort.InferenceSession.create(bytes, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
+      // warm-up run so the first real scan does not pay one-off initialisation cost
+      try { await session.run({ input: new ort.Tensor('uint8', new Uint8Array(SIZE * SIZE * 3), [SIZE, SIZE, 3]) }); } catch { /* ignore */ }
+      engineReady = true;
       return { ort, session, head };
     })().catch((e) => {
       enginePromise = null; // allow a retry on the next scan
@@ -137,4 +141,13 @@ export async function classifyLocally(blob: Blob, onProgress?: (fraction: number
   const pixels = await toPixels(blob);
   const out = await session.run({ input: new ort.Tensor('uint8', pixels, [SIZE, SIZE, 3]) });
   return headPredict(out.output.data as Float32Array, head);
+}
+
+export const isEngineReady = () => engineReady;
+
+/** Start downloading/initialising the model in the background so a scan finds it ready. */
+export function preloadEngine(): void {
+  const conn = (navigator as any).connection;
+  if (conn?.saveData === true || ['slow-2g', '2g', '3g'].includes(conn?.effectiveType)) return;
+  loadEngine().catch(() => {});
 }

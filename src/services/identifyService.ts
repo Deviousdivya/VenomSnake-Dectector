@@ -5,7 +5,7 @@
 //      on-device guess, with the chance that the snake is venomous.
 import { DetectionResult, SnakeAlternative } from '../types';
 import { BITE_STEPS, GENERIC_PRECAUTIONS, KbSpecies, SPECIES_KB } from '../data/speciesKb';
-import { classifyLocally, LocalPrediction } from './localModel';
+import { classifyLocally, isEngineReady, LocalPrediction, loadEngine } from './localModel';
 import { detectSnake } from './geminiService';
 
 // Chosen on held-out photos (see docs/identification-model-evaluation.md).
@@ -15,7 +15,7 @@ export const GATE = {
   venomousAbove: 0.5, // P(dangerous species) needed to call it VENOMOUS on-device
   harmlessBelow: 0.05, // P(dangerous species) must be below this to call it NON-VENOMOUS on-device
 };
-const LOAD_TIMEOUT_MS = 60_000;
+const LOAD_TIMEOUT_MS = 6_000; // if the model is not ready this quickly, go to the cloud (it keeps loading for next time)
 
 export type Stage = 'on-device' | 'cloud';
 
@@ -111,7 +111,11 @@ export async function identifySnake(o: IdentifyOptions): Promise<DetectionResult
   if (!saveData) {
     try {
       o.onStage?.('on-device');
-      pred = await withTimeout(classifyLocally(o.file, o.onModelProgress), LOAD_TIMEOUT_MS);
+      if (!isEngineReady()) {
+        loadEngine(o.onModelProgress).catch(() => {});
+        await withTimeout(loadEngine(), LOAD_TIMEOUT_MS);
+      }
+      pred = await classifyLocally(o.file);
       const sure = decideLocally(pred);
       if (sure) return sure;
     } catch (e) {

@@ -5,6 +5,7 @@ import { Camera, CircleAlert, ImagePlus, Info, Loader2, ScanSearch, Siren, Trash
 import { Seo } from '../seo/Seo';
 import { useLanguage } from '../context/LanguageContext';
 import { identifySnake } from '../services/identifyService';
+import { preloadEngine } from '../services/localModel';
 import { compressImage } from '../utils/imageCompressor';
 import { Coords, getCoords, readAsDataURL } from '../lib/geo';
 import { DetectionResult } from '../types';
@@ -79,27 +80,18 @@ export default function Identify() {
     setError(null);
     setResult(null);
 
-    // Location makes the rescue and hospital suggestions relevant. It is optional - the scan continues without it.
-    setPhase('locating');
+    // Location makes the rescue and hospital suggestions relevant, but it must never slow the scan down:
+    // ask in the background and use it only if it has arrived by the time it is needed.
     let locationStr = 'Unknown';
-    try {
-      const c = await getCoords(8000);
-      setCoords(c);
-      locationStr = `${c.lat}, ${c.lng}`;
-    } catch {
-      /* no location: general results */
-    }
+    getCoords(8000).then((c) => { setCoords(c); locationStr = `${c.lat}, ${c.lng}`; }).catch(() => {});
 
     try {
-      const full = await readAsDataURL(file);
-      setPhase('optimizing');
-      const compressed = await compressImage(full);
       setPhase('analyzing');
       const res = await identifySnake({
         file,
-        getBase64: async () => compressed,
+        getBase64: async () => compressImage(await readAsDataURL(file)),
         languageName,
-        location: locationStr,
+        get location() { return locationStr; },
         onStage: (s) => setPhase(s === 'cloud' ? 'cloud' : 'analyzing'),
         onModelProgress: (f) => setModelPct(Math.round(f * 100)),
       });
@@ -111,6 +103,12 @@ export default function Identify() {
       setPhase('idle');
     }
   };
+
+  useEffect(() => {
+    const w = window as any;
+    const id = w.requestIdleCallback ? w.requestIdleCallback(() => preloadEngine()) : setTimeout(preloadEngine, 800);
+    return () => (w.cancelIdleCallback ? w.cancelIdleCallback(id) : clearTimeout(id));
+  }, []);
 
   useEffect(() => {
     if (result || error) outRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
