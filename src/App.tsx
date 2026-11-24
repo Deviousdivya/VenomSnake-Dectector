@@ -5,7 +5,7 @@
 
 import { Component, ErrorInfo, lazy, ReactNode, Suspense, useEffect, useRef } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { CircleAlert, Loader2, RefreshCw, WifiOff } from 'lucide-react';
+import { CircleAlert, RefreshCw, WifiOff } from 'lucide-react';
 
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -84,8 +84,12 @@ function OfflineBanner() {
 
 function Loading() {
   return (
-    <div className="container-x grid min-h-[50vh] place-items-center" role="status">
-      <Loader2 size={32} className="animate-spin text-brand-700" aria-label="Loading" />
+    <div className="container-x py-16" role="status" aria-label="Loading">
+      <div className="skeleton h-4 w-24 rounded-lg" />
+      <div className="skeleton mt-5 h-12 w-2/3 max-w-xl rounded-xl" />
+      <div className="skeleton mt-4 h-5 w-full max-w-2xl rounded-lg" />
+      <div className="skeleton mt-2 h-5 w-5/6 max-w-2xl rounded-lg" />
+      <div className="skeleton mt-10 h-56 w-full max-w-3xl rounded-3xl" />
     </div>
   );
 }

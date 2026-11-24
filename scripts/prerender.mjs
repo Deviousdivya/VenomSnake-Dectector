@@ -24,7 +24,7 @@ function staticBody(page, route) {
       ? `<h2>Frequently asked questions</h2>${data.faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}`
       : "";
   return (
-    `<main style="max-width:44rem;margin:0 auto;padding:2rem 1.25rem;font:16px/1.6 system-ui,sans-serif;color:#10201b">` +
+    `<main style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden">` +
     `<h1>${esc(page.h1)}</h1><p>${esc(page.summary)}</p>` +
     `<p><strong>Snakebite emergency:</strong> call <a href="tel:108">108</a> or <a href="tel:112">112</a> immediately.</p>` +
     `<nav aria-label="Pages"><ul>${links}</ul></nav>${faq}</main>`
