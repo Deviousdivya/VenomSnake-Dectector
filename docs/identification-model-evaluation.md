@@ -1,40 +1,55 @@
-# Can a free ML model replace Gemini for snake identification?
+# How snake identification works (and how well)
 
-**Short answer: not safely, today.** This documents the experiment so the decision can be revisited.
+Identification is a **ladder**, so one exhausted free quota can no longer stop the app:
 
-## What was tested
+1. **On-device model** (free, private, no API key, no quota). Runs in the browser with WebAssembly.
+   Its answer is accepted only when it is *confident and clear-cut*.
+2. **Gemini (cloud)** is asked about everything the on-device model is unsure of: blurry, dark, low-resolution,
+   unfamiliar or ambiguous photos.
+3. If Gemini is unavailable (quota, offline), the app shows an honest **"Not sure — treat it as venomous"** result built from
+   the on-device guess, with the *chance it is venomous* and the likely candidates.
 
-* **Model:** the SnakeCLEF 2024 organisers' baseline, `picekl/SnakeCLEF2024-Sample_Submission` on Hugging Face (SwinV2-tiny, ONNX, 122 MB, MIT licence). It was trained on ~1,784 snake species worldwide, including India.
-* **Problem:** the model returns class *numbers*; the class→species table is part of the competition data and is not freely downloadable. To work around this, the class used for each species was **discovered empirically**: the model was run on reference photos of known Indian species, the most frequent class for each species was taken from half of the photos, and accuracy was measured on the other, unseen half.
-* **Data:** up to 26 Wikimedia Commons photos for each of 19 Indian species (231 held-out photos). Photos are of mixed quality (captive, close-up, dead animals, etc.), which is also what real users will upload.
+Every result shows a species-confidence meter and a "chance it is venomous" meter. A "harmless" answer that the cloud AI
+itself is unsure about (< 60%) is downgraded to "not sure".
 
-## Results (held-out photos)
+## The on-device model
 
-| Question | Result |
+* **Base:** SnakeCLEF 2024 baseline `picekl/SnakeCLEF2024-Sample_Submission` (SwinV2-tiny, MIT licence, ~1,784 species),
+  quantised to int8 (122 MB → 59 MB).
+* **Class names are not published**, so they were discovered empirically from labelled Wikimedia Commons photos of Indian species.
+* **Head:** a small softmax-regression head (21 Indian species, 10 of them dangerous) trained on the base model's scores.
+  Files: `public/models/snake-swin-int8.onnx`, `public/models/head.json`.
+* **Gate** (`src/services/identifyService.ts`): top-species probability ≥ 0.7, base-model max score ≥ 14, and
+  P(dangerous species) ≥ 0.5 to say *venomous* on-device or < 0.05 to say *harmless* on-device. Anything else goes to Gemini.
+
+## Measured results (held-out photos the head never saw; 248 photos, 21 species)
+
+| Check | Result |
 | --- | --- |
-| Species correct on the first guess | **51%** |
-| Species within the top 3 guesses | 68% |
-| Species within the top 5 guesses | 73% |
-| **Dangerous snakes flagged as dangerous** (any of top 3) | **66%** (86 of 130) |
-| Harmless snakes wrongly flagged dangerous | 3% (3 of 101) |
-| Big Four, flagged dangerous within top 3 | cobra 5/13 · krait 9/13 · Russell's viper 9/13 · saw-scaled viper 11/13 |
+| On-device model alone, species top-1 | 74% (51% for the raw base model) |
+| Same, int8 vs full precision | no loss (74% vs 75%) |
+| Clear photos answered on-device (no cloud call) | ~61% (151 / 248) |
+| Dangerous snakes wrongly called **harmless** by the gate | **0 of 130** |
+| Venomous snakes confidently identified on-device | 81 of 130; the rest go to Gemini |
+| Harmless snakes wrongly called venomous on-device | 4 of 118 |
+| Blurred / 40-pixel photos | 93–97% sent to Gemini instead of guessing |
+| Non-snake animals (lizards, eels, worms; 54 photos) | **8 of 54 still get a confident snake answer on-device** |
 
-The two cobra species (*Naja naja*, *N. kaouthia*) collapsed onto the same class, and the model often picked neither.
+## Limitations — please read
 
-## Conclusion
+* Small test set (photos from Wikimedia Commons), so every number above has wide error bars. Real phone photos will differ.
+* The on-device model knows **21 species**. A snake outside that list can be mapped to the nearest known species; the
+  confidence gate reduces but does not remove this.
+* Non-snake animals can still be matched to a snake (see the last row). A harmless-looking answer is never a guarantee of safety.
+* On-device species descriptions are English-only; the cloud path follows the chosen language.
+* The cloud AI's own confidence numbers are self-reported and are less reliable than measured ones.
+* This is information, not medical advice. Treat every snake as venomous and never handle it.
 
-About **one in three dangerous snakes would be reported as not dangerous**. For a snakebite-safety tool that is the unsafe kind of error, so this model is **not** used as the identifier. Gemini remains the identifier; the app instead makes sure that an exhausted AI quota never leaves a visitor with nothing (see below).
+## Improving it
 
-## What the app does when the AI is unavailable
+Add more labelled photos per species (iNaturalist research-grade images are ideal), re-extract the base model's scores,
+re-fit the head, then re-measure on a held-out split before changing the gate. If you replace `head.json` or the model,
+bump the `?v=` in `src/services/localModel.ts` (the files are cached as immutable).
 
-* **Identify:** a clear message plus "treat it as venomous", the Big Four field guide, the symptom checker and emergency help.
-* **Symptom checker:** falls back to cautious built-in rules (`src/services/localTriage.ts`): any bite is urgent, and warning signs raise it to critical.
-* **Emergency page, hospitals, Big Four guide, first aid:** need no AI at all.
-
-## Ways to remove the dependency properly
-
-1. **Enable billing on the Gemini API key.** The "limit exhausted" problem is a free-tier limit; a paid tier costs a small fraction of a cent per scan (check current pricing) and keeps the best-performing identifier.
-2. **Train a purpose-built model** on ~50 Indian species using research-grade iNaturalist/GBIF photos (fine-tune a small vision backbone on a free Colab GPU, export to ONNX). Measure it with the same held-out test above and only replace Gemini if dangerous-snake recall is high (target ≥ 95%).
-3. **Use both:** a local model as a fast first pass, with the AI confirming — only if the local model passes the recall target.
-
-Do not create several Google projects/keys to get around free-tier limits; that is against Google's terms.
+Do not create several Google projects/keys to get around free-tier limits; that is against Google's terms. Enabling billing
+on the Gemini key is the simplest way to make the cloud step unlimited.

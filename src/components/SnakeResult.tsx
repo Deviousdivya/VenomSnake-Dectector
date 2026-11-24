@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CircleCheck, CircleHelp, Flag, HeartPulse, Info, Phone, ShieldAlert, Siren, Syringe, TriangleAlert } from 'lucide-react';
+import { CircleCheck, CircleHelp, Cpu, Flag, HeartPulse, Info, Phone, ShieldAlert, Siren, Syringe, TriangleAlert } from 'lucide-react';
 import { DetectionResult } from '../types';
 import { Coords } from '../lib/geo';
 import { cn } from '../lib/utils';
@@ -11,6 +11,21 @@ interface Props {
   result: DetectionResult;
   coords: Coords | null;
   onCoords: (c: Coords) => void;
+}
+
+function Meter({ label, value, tone }: { label: string; value: number; tone: 'brand' | 'danger' }) {
+  const v = Math.max(0, Math.min(100, Math.round(value)));
+  return (
+    <div>
+      <div className="flex items-baseline justify-between text-sm">
+        <span className="font-semibold text-ink">{label}</span>
+        <span className="tabular-nums font-bold">{v}%</span>
+      </div>
+      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-line" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={v}>
+        <div className={cn('h-full rounded-full', tone === 'danger' ? 'bg-danger-600' : 'bg-brand-600')} style={{ width: `${v}%` }} />
+      </div>
+    </div>
+  );
 }
 
 function CallButtons() {
@@ -58,7 +73,13 @@ export function SnakeResult({ result, coords, onCoords }: Props) {
           {venomous ? <TriangleAlert size={14} aria-hidden /> : unknown ? <CircleHelp size={14} aria-hidden /> : <CircleCheck size={14} aria-hidden />}
           {venomous ? t('risk_venomous') : unknown ? 'Unknown' : t('risk_non_venomous')}
         </span>
-        <span className="text-xs text-muted">AI-assisted result — it can be wrong</span>
+        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+          <Cpu size={13} aria-hidden />
+          {result.source === 'on-device' && 'Identified on your device · it can be wrong'}
+          {result.source === 'gemini' && 'Identified by cloud AI · it can be wrong'}
+          {result.source === 'on-device-fallback' && 'On-device guess · cloud AI unavailable'}
+          {!result.source && 'AI-assisted result · it can be wrong'}
+        </span>
       </div>
 
       <div className="card-pad">
@@ -67,6 +88,33 @@ export function SnakeResult({ result, coords, onCoords }: Props) {
         </h2>
         <p className="mt-1 font-serif text-lg italic text-muted">{result.scientificName}</p>
         <p className="mt-4 leading-relaxed text-ink-2">{result.description}</p>
+
+        {(result.confidence != null || result.chanceVenomous != null) && (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {result.confidence != null && <Meter label="Species confidence" value={result.confidence} tone="brand" />}
+            {result.chanceVenomous != null && <Meter label="Chance it is venomous" value={result.chanceVenomous} tone="danger" />}
+          </div>
+        )}
+
+        {result.alternatives && result.alternatives.length > 0 && (
+          <div className="mt-5">
+            <h3 className="font-sans text-sm font-bold tracking-normal">{unknown ? 'It could be' : 'Other possibilities'}</h3>
+            <ul className="mt-2 space-y-1.5 text-sm text-ink-2">
+              {result.alternatives.map((a, i) => (
+                <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-paper px-3 py-2 ring-1 ring-line">
+                  <span>
+                    {a.commonName}
+                    {a.scientificName && <em className="ml-1 text-muted">{a.scientificName}</em>}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className={cn('badge', a.venomous ? 'badge-danger' : 'badge-safe')}>{a.venomous ? 'Venomous' : 'Harmless'}</span>
+                    <span className="tabular-nums text-muted">{Math.round(a.confidence)}%</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {venomous && (
           <div className="mt-8 rounded-2xl border border-danger-600/25 bg-danger-50/70 p-5 sm:p-6">
@@ -124,6 +172,10 @@ export function SnakeResult({ result, coords, onCoords }: Props) {
           <div className="mt-8 rounded-2xl border border-warn-600/30 bg-warn-50 p-5 text-sm text-ink-2">
             <p className="flex items-center gap-2 font-semibold text-warn-600">
               <ShieldAlert size={18} aria-hidden /> We couldn't tell whether this snake is venomous
+            </p>
+            <p className="mt-2 font-semibold text-ink">
+              Do not go near it. It may be venomous or it may be harmless
+              {result.chanceVenomous != null && <> — we estimate about a {Math.round(result.chanceVenomous)}% chance that it is venomous</>}, but we are not sure.
             </p>
             <p className="mt-2">
               Treat it as venomous: keep away and, if anyone is bitten, <a className="font-bold text-danger-700" href="tel:108">call 108</a> right away.{' '}

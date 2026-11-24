@@ -39,6 +39,14 @@ export default defineConfig(({ mode }) => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
           navigateFallbackDenylist: [/^\/api\//],
+          // the on-device model (~59 MB) and its wasm runtime are cached on first use, not precached
+          runtimeCaching: [
+            {
+              urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/models/') || url.pathname.startsWith('/ort/'),
+              handler: 'CacheFirst',
+              options: { cacheName: 'snake-model-v1', expiration: { maxEntries: 8 }, cacheableResponse: { statuses: [200] } },
+            },
+          ],
         },
       }),
     ],

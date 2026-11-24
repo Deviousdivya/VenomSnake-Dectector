@@ -49,11 +49,11 @@ npm run dev                    # Express API + Vite on http://localhost:3000
 ## How it works
 
 ```
-photo ─► resized in the browser ─► Gemini ─► { species, venom status, precautions, ... }
+photo ─► on-device model ─(unsure)─► Gemini ─(unavailable)─► "not sure, keep away" ─► { species, venom status, precautions, ... }
                                                  └─ if VENOMOUS ─► /api/hospitals ─► OpenStreetMap (Overpass) ─► nearest hospitals
 ```
 
-* `src/services/geminiService.ts` – identification. Results are cached in `localStorage`, keyed by a hash of the whole image.
+* `src/services/identifyService.ts` – the identification ladder; `src/services/localModel.ts` – on-device model; `src/services/geminiService.ts` – cloud step. Results are cached in `localStorage`, keyed by a hash of the whole image.
 * `src/services/diagnosisService.ts` – symptom summary.
 * `src/services/hospitalService.ts` + `api/server.ts` (`POST /api/hospitals`) – nearby hospitals. The server sends an identifying User-Agent, caches results for a few hours by approximate location and tries several public Overpass mirrors. Public Overpass servers are best-effort; the UI falls back to a Google Maps search link if none respond.
 * `api/server.ts` – Express app (also the Vercel function): `/api/news`, `/api/sightings`, `/api/hospitals`, `/api/health`.
@@ -80,12 +80,12 @@ src/locales/             translations (English complete; Hindi for core screens;
 
 ## Identification engine
 
-Gemini is the identifier. A free ML model (SnakeCLEF baseline) was evaluated as a replacement and **rejected**: it flagged only 66% of dangerous snakes as dangerous. Details, numbers and the alternatives (paid tier, a purpose-trained Indian-species model) are in [`docs/identification-model-evaluation.md`](docs/identification-model-evaluation.md). When the AI is unavailable (e.g. free quota used up) the app falls back to built-in guidance instead of failing.
+Identification is a ladder: an **on-device model** (SnakeCLEF baseline + a head trained on 21 Indian species, int8, runs in the browser via WebAssembly, no key or quota) answers when it is confident; otherwise **Gemini** is asked; if Gemini is unavailable the app shows a "Not sure — treat it as venomous" result with the chance it is venomous. Every result carries confidence meters. Measured numbers and limitations are in [`docs/identification-model-evaluation.md`](docs/identification-model-evaluation.md).
 
 ## Roadmap
 
 * **Move the Gemini calls to the server.** `vite.config.ts` currently inlines `GEMINI_API_KEY` into the public JavaScript. Until that changes, restrict the key to this site's domain and set a spend limit.
-* Enable billing on the Gemini key (removes free-tier limits), or train an Indian-species model that passes a ≥95% dangerous-snake recall test.
+* Enable billing on the Gemini key (removes free-tier limits for the cloud step) and improve the on-device model with more photos per species.
 * Re-check model names (`gemini-3.1-flash-lite-preview` is a preview model) and verify end-to-end with a fresh key.
 * Medical review of first-aid wording and of the translated emergency steps.
 * Complete the remaining Indian-language translations with native speakers.

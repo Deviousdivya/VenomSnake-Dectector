@@ -10,6 +10,21 @@ export interface DetectionResult {
   antidoteInfo?: string;
   rescueContacts?: string[];
   medicalFacility?: string;
+  /** 0-100: how sure the identifier is about the species shown */
+  confidence?: number;
+  /** 0-100: how likely it is that this snake is venomous (set when the identification is uncertain) */
+  chanceVenomous?: number;
+  /** other possibilities, most likely first */
+  alternatives?: SnakeAlternative[];
+  /** which identifier produced this result */
+  source?: 'on-device' | 'gemini' | 'on-device-fallback';
+}
+
+export interface SnakeAlternative {
+  commonName: string;
+  scientificName?: string;
+  confidence: number; // 0-100
+  venomous: boolean;
 }
 
 export interface NewsItem {

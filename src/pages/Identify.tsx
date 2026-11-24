@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { Camera, CircleAlert, ImagePlus, Info, Loader2, ScanSearch, Siren, Trash2 } from 'lucide-react';
 import { Seo } from '../seo/Seo';
 import { useLanguage } from '../context/LanguageContext';
-import { detectSnake } from '../services/geminiService';
+import { identifySnake } from '../services/identifyService';
 import { compressImage } from '../utils/imageCompressor';
 import { Coords, getCoords, readAsDataURL } from '../lib/geo';
 import { DetectionResult } from '../types';
@@ -12,12 +12,13 @@ import { cn } from '../lib/utils';
 import { CameraCapture } from '../components/CameraCapture';
 import { SnakeResult } from '../components/SnakeResult';
 
-type Phase = 'idle' | 'locating' | 'optimizing' | 'analyzing';
+type Phase = 'idle' | 'locating' | 'optimizing' | 'analyzing' | 'cloud';
 
 const phaseText: Record<Exclude<Phase, 'idle'>, string> = {
   locating: 'Checking your location…',
   optimizing: 'Preparing your photo…',
-  analyzing: 'Identifying the snake…',
+  analyzing: 'Analysing on your device…',
+  cloud: 'Double-checking with cloud AI…',
 };
 
 export default function Identify() {
@@ -30,7 +31,9 @@ export default function Identify() {
   const [coords, setCoords] = useState<Coords | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const outRef = useRef<HTMLDivElement>(null);
+  const [modelPct, setModelPct] = useState(0);
   const busy = phase !== 'idle';
+  const phaseLabel = phase === 'analyzing' && modelPct > 0 && modelPct < 100 ? `Loading the identifier (first time only) ${modelPct}%` : phaseText[phase as Exclude<Phase, 'idle'>];
 
   const setPhoto = useCallback((f: File) => {
     setPreview((old) => {
@@ -92,7 +95,14 @@ export default function Identify() {
       setPhase('optimizing');
       const compressed = await compressImage(full);
       setPhase('analyzing');
-      const res = await detectSnake(compressed, 'image/jpeg', languageName, locationStr);
+      const res = await identifySnake({
+        file,
+        getBase64: async () => compressed,
+        languageName,
+        location: locationStr,
+        onStage: (s) => setPhase(s === 'cloud' ? 'cloud' : 'analyzing'),
+        onModelProgress: (f) => setModelPct(Math.round(f * 100)),
+      });
       setResult(res);
       localStorage.setItem(`snake_scan_${Date.now()}`, JSON.stringify(res));
     } catch (e: any) {
@@ -168,7 +178,7 @@ export default function Identify() {
             <button type="button" onClick={handleScan} disabled={!file || busy} className="btn btn-primary w-full !py-4 text-base">
               {busy ? (
                 <>
-                  <Loader2 size={20} className="animate-spin" aria-hidden /> {phaseText[phase as Exclude<Phase, 'idle'>]}
+                  <Loader2 size={20} className="animate-spin" aria-hidden /> {phaseLabel}
                 </>
               ) : (
                 <>
@@ -211,7 +221,7 @@ export default function Identify() {
               <div className="card flex min-h-[320px] flex-col items-center justify-center gap-6 p-10 text-center" role="status">
                 <Loader2 size={44} className="animate-spin text-brand-700" aria-hidden />
                 <div>
-                  <h2 className="text-2xl">{phaseText[phase as Exclude<Phase, 'idle'>]}</h2>
+                  <h2 className="text-2xl">{phaseLabel}</h2>
                   <p className="mt-2 text-ink-2">This usually takes a few seconds.</p>
                 </div>
                 <div className="h-1.5 w-56 overflow-hidden rounded-full bg-brand-100">

@@ -14,9 +14,19 @@ const DETECTION_SCHEMA = {
     emergencySteps: { type: Type.ARRAY, items: { type: Type.STRING } },
     antidoteInfo: { type: Type.STRING },
     rescueContacts: { type: Type.ARRAY, items: { type: Type.STRING } },
-    medicalFacility: { type: Type.STRING }
+    medicalFacility: { type: Type.STRING },
+    confidence: { type: Type.NUMBER },
+    chanceVenomous: { type: Type.NUMBER },
+    alternatives: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: { commonName: { type: Type.STRING }, scientificName: { type: Type.STRING }, confidence: { type: Type.NUMBER }, venomous: { type: Type.BOOLEAN } },
+        required: ['commonName', 'confidence', 'venomous']
+      }
+    }
   },
-  required: ['commonName', 'scientificName', 'riskLevel', 'description', 'precautions', 'emergencySteps', 'antidoteInfo', 'rescueContacts', 'medicalFacility']
+  required: ['confidence', 'chanceVenomous', 'commonName', 'scientificName', 'riskLevel', 'description', 'precautions', 'emergencySteps', 'antidoteInfo', 'rescueContacts', 'medicalFacility']
 };
 
 // Fingerprint of the WHOLE image. (The cache key used to be only the first 100 characters of the data, which for a
@@ -57,6 +67,10 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
           1. Specific anti-venom/antidote name.
           2. Local snake rescue team contact (if location known: ${userLocation || 'Unknown'}).
           3. Best hospital for snakebite treatment nearby.
+          Also give: confidence (0-100, how sure you are of the species), chanceVenomous (0-100, how likely this snake is dangerous to people),
+          and up to 3 alternatives (other species it could be, with confidence 0-100). If the photo is blurry or the snake is not clearly visible,
+          say so with low confidence and riskLevel UNKNOWN - never guess. Be honest about uncertainty.
+          Also give confidence (0-100: how sure you are of the species), chanceVenomous (0-100: how likely this snake is dangerous to people) and up to 3 alternatives (other possible species, confidence 0-100). If the photo is blurry or no snake is clearly visible, use low confidence and riskLevel UNKNOWN - never guess.
           Return ONLY JSON conforming to the provided schema.` },
           { inlineData: { data: dataOnly, mimeType: mimeType || 'image/jpeg' } }
         ]
@@ -69,7 +83,8 @@ export async function detectSnake(base64Image: string, mimeType: string, languag
     });
 
     if (!response.text) throw new Error("No result came back. Please try again with a clearer photo.");
-    const result = JSON.parse(response.text);
+    const result: DetectionResult = JSON.parse(response.text);
+    result.source = 'gemini';
     
     // Save to cache for fast recurring answers
     localStorage.setItem(cacheKey, JSON.stringify(result));
