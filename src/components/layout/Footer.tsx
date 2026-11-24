@@ -37,11 +37,6 @@ export function Footer() {
             <li><Link className={link} to="/about">How it works</Link></li>
             <li><Link className={link} to="/privacy">Privacy policy</Link></li>
             <li><Link className={link} to="/terms">Terms &amp; disclaimer</Link></li>
-            <li>
-              <a className={link} href="https://github.com/Deviousdivya/VenomSnake-Dectector" target="_blank" rel="noopener noreferrer">
-                GitHub
-              </a>
-            </li>
           </ul>
         </nav>
 

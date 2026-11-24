@@ -1,6 +1,6 @@
 import { Siren, TriangleAlert } from 'lucide-react';
 
-/** A looping, clearly-labelled sample: the photo is scanned, then the result is revealed. Pure CSS animation. */
+/** A looping, clearly-labelled sample: a real cobra photo is scanned, then the result is revealed. Pure CSS animation. */
 export function HeroDemo() {
   return (
     <div className="rise rise-3 relative">
@@ -13,28 +13,19 @@ export function HeroDemo() {
           </span>
         </div>
 
-        {/* the "photo" - an illustration, scanned in a loop */}
-        <div className="relative h-56 overflow-hidden bg-gradient-to-b from-[#d7e0c0] to-[#9fb083]">
-          <svg viewBox="0 0 400 224" preserveAspectRatio="xMidYMid slice" className="demo-photo absolute inset-0 h-full w-full" aria-hidden>
-            <g stroke="#6f8651" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity=".55">
-              {[14, 38, 66, 92, 118, 300, 326, 352, 378, 20, 340].map((x, i) => (
-                <path key={x} d={`M${x} 224 q${(i % 3) * 3 - 3} -34 ${(i % 5) - 2} -${58 + (i % 4) * 8}`} />
-              ))}
-            </g>
-            <ellipse cx="200" cy="208" rx="124" ry="12" fill="#3d4a2a" opacity=".32" />
-            <ellipse cx="200" cy="192" rx="102" ry="22" fill="#7a5530" />
-            <ellipse cx="200" cy="171" rx="84" ry="20" fill="#8a6234" />
-            <ellipse cx="200" cy="152" rx="63" ry="17" fill="#9a6f3a" />
-            <path d="M200 150C200 122 192 102 200 80" stroke="#9a6f3a" strokeWidth="32" strokeLinecap="round" fill="none" />
-            <path d="M200 42C132 46 122 108 200 124C278 108 268 46 200 42Z" fill="#a9793f" stroke="#5a3b1a" strokeWidth="3" />
-            <g fill="none" stroke="#ecdcb4" strokeWidth="5" strokeLinecap="round" opacity=".85">
-              <path d="M178 76q22 10 44 0" /><path d="M172 92q28 12 56 0" /><path d="M182 107q18 8 36 0" />
-            </g>
-            <ellipse cx="200" cy="32" rx="21" ry="15" fill="#8a6234" stroke="#5a3b1a" strokeWidth="2.5" />
-            <circle cx="191" cy="29" r="3" fill="#161008" />
-            <circle cx="209" cy="29" r="3" fill="#161008" />
-            <path d="M200 46v9m0 0l-4 5m4-5l4 5" stroke="#b3302a" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-          </svg>
+        {/* a real photograph (Wikimedia Commons, CC BY 3.0), scanned in a loop */}
+        <div className="relative h-56 overflow-hidden bg-paper">
+          <img
+            src="/images/indian-cobra.jpg"
+            alt="An Indian cobra rearing up on sand"
+            width={960}
+            height={626}
+            className="demo-photo absolute inset-0 h-full w-full object-cover object-[50%_60%]"
+            fetchPriority="high"
+          />
+          <p className="absolute bottom-1.5 right-2 z-10 rounded bg-black/45 px-1.5 py-0.5 text-[10px] text-white/90">
+            Photo: Jerzy Strzelecki · <a className="underline" href="https://commons.wikimedia.org/wiki/File:Cobra,_Naja-naja.jpg" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>
+          </p>
 
           <div className="demo-scan absolute inset-0" aria-hidden>
             <div className="scan-beam" />
