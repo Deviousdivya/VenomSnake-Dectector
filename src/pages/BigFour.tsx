@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Camera, Eye, MapPin, Moon, Phone, Siren, TriangleAlert, X } from 'lucide-react';
 import { Seo } from '../seo/Seo';
 import { Reveal } from '../components/Reveal';
-import { SkinPattern } from '../components/SkinPattern';
+import { SnakePhoto } from '../components/SnakePhoto';
 import { bigFour } from '../data/bigFour';
 
 export default function BigFour() {
@@ -33,7 +33,7 @@ export default function BigFour() {
         {bigFour.map((s, i) => (
           <Reveal as="article" key={s.id} className="grid items-center gap-10 lg:grid-cols-2">
             <div className={`overflow-hidden rounded-[2rem] shadow-lift ring-1 ring-line ${i % 2 ? 'lg:order-2' : ''}`}>
-              <SkinPattern kind={s.id} className="h-72 w-full sm:h-96" />
+              <SnakePhoto kind={s.id} className="h-72 w-full sm:h-96" />
             </div>
             <div>
               <p className="eyebrow">0{i + 1}</p>

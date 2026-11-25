@@ -59,3 +59,20 @@ export const bigFour: BigFourSnake[] = [
     warning: 'It is small and easy to step on in dry ground — wear boots and use a torch at night.',
   },
 ];
+
+// Real photographs from Wikimedia Commons (licences require the credit to be shown with the photo).
+export interface SnakePhotoInfo {
+  src: string;
+  alt: string;
+  author: string;
+  license: string;
+  page: string;
+  position: string; // CSS object-position, keeps the snake in frame when the image is cropped
+}
+
+export const bigFourPhotos: Record<BigFourSnake['id'], SnakePhotoInfo> = {
+  cobra: { src: '/images/big4-cobra.jpg', alt: 'An Indian cobra rearing up with its hood raised', author: 'Jerzy Strzelecki', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Cobra,_Naja-naja.jpg', position: '50% 55%' },
+  krait: { src: '/images/big4-krait.jpg', alt: 'A common krait, black with thin white cross-bands', author: 'Vaikoovery', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Common_Krait(Bungarus_Caeruleus)_in_Parassinikadavu_Snake_Park.jpg', position: '50% 65%' },
+  russell: { src: '/images/big4-russell.jpg', alt: "A coiled Russell's viper showing its chain of dark oval blotches", author: 'Davidvraju', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Daboia_russelii_2014.jpg', position: '60% 40%' },
+  sawscaled: { src: '/images/big4-sawscaled.jpg', alt: 'A saw-scaled viper with rough keeled scales and a pale zig-zag pattern', author: 'Uajith', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:15.Saw_Scaled_Viper.jpg', position: '70% 50%' },
+};

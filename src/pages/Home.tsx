@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { Reveal, trackSpotlight } from '../components/Reveal';
 import { HeroDemo } from '../components/HeroDemo';
 import { SnakeLine } from '../components/SnakeLine';
-import { SkinPattern } from '../components/SkinPattern';
+import { SnakePhoto } from '../components/SnakePhoto';
 import { bigFour } from '../data/bigFour';
 
 const steps = [
@@ -169,7 +169,7 @@ export default function Home() {
               <Reveal key={s.id} as="li" delay={i * 110}>
                 <Link to="/big-four" className="card card-hover group block h-full overflow-hidden no-underline">
                   <div className="h-36 overflow-hidden">
-                    <SkinPattern kind={s.id} className="h-full w-full transition-transform duration-700 group-hover:scale-110" />
+                    <SnakePhoto kind={s.id} linkCredit={false} hover className="h-full w-full" />
                   </div>
                   <div className="p-6">
                     <h3 className="text-[1.45rem]">{s.name}</h3>
