@@ -7,7 +7,7 @@ export function MobileEmergencyBar() {
   if (pathname === '/emergency') return null;
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_24px_-12px_rgba(16,32,27,0.25)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-brand-950/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-14px_rgba(0,0,0,0.6)] backdrop-blur md:hidden"
       role="region"
       aria-label="Emergency actions"
     >
@@ -15,7 +15,7 @@ export function MobileEmergencyBar() {
         <a href="tel:108" className="btn btn-danger btn-sm">
           <Phone size={16} aria-hidden /> Call 108
         </a>
-        <Link to="/emergency" className="btn btn-outline-danger btn-sm">
+        <Link to="/emergency" className="btn btn-light btn-sm">
           <Siren size={16} aria-hidden /> Bitten? Get help
         </Link>
       </div>
