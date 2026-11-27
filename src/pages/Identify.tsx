@@ -12,6 +12,8 @@ import { DetectionResult } from '../types';
 import { cn } from '../lib/utils';
 import { CameraCapture } from '../components/CameraCapture';
 import { SnakeResult } from '../components/SnakeResult';
+import { PageHero } from '../components/PageHero';
+import { bigFourPhotos } from '../data/bigFour';
 
 type Phase = 'idle' | 'locating' | 'optimizing' | 'analyzing' | 'cloud';
 
@@ -119,16 +121,11 @@ export default function Identify() {
   return (
     <>
       <Seo path="/identify" />
+      <PageHero eyebrow="AI snake identification" title={t('scan_title')} lead={t('scan_intro')} image={bigFourPhotos.cobra.lg} position={bigFourPhotos.cobra.position} />
       <div className="container-x py-12 sm:py-16">
-        <header className="max-w-3xl">
-          <p className="eyebrow">AI snake identification</p>
-          <h1 className="h-section mt-3 sm:!text-5xl">{t('scan_title')}</h1>
-          <p className="lead mt-4">{t('scan_intro')}</p>
-        </header>
-
-        <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,26rem)_1fr]">
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,26rem)_1fr]">
           {/* Upload */}
-          <div className="space-y-5 lg:sticky lg:top-24">
+          <div className="space-y-5 lg:sticky lg:top-28">
             <div
               {...getRootProps()}
               className={cn(
