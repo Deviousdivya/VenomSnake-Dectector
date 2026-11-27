@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f6149" />
+    <meta name="theme-color" content="#07190f" />
     <meta name="color-scheme" content="light" />
     <meta name="author" content="VenomSnake Detector" />
     <meta name="format-detection" content="telephone=yes" />
@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Manrope:wght@400..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Playfair+Display:ital,wght@0,400..700;1,400..600&display=swap"
       rel="stylesheet"
     />
 
@@ -42,16 +42,16 @@
     <script type="application/ld+json" id="ld-json">{}</script>
 
     <style>
-      html{background:#faf7f0}
-      #splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#faf7f0;transition:opacity .5s ease,visibility .5s}
+      html{background:#07190f}
+      #splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#07190f;transition:opacity .5s ease,visibility .5s}
       #splash.hide{opacity:0;visibility:hidden}
       #splash .in{display:flex;flex-direction:column;align-items:center;gap:18px;animation:sp-rise .7s cubic-bezier(.2,.7,.2,1) both}
       #splash img{width:64px;height:64px;animation:sp-pulse 2.2s ease-in-out infinite}
-      #splash .wm{font:600 28px/1 Fraunces,Georgia,'Times New Roman',serif;color:#12231d;letter-spacing:-.01em}
-      #splash .wm b{font-weight:600;color:#0f6149}
+      #splash .wm{font:500 30px/1 'Playfair Display',Georgia,'Times New Roman',serif;color:#f4efe6;letter-spacing:-.01em}
+      #splash .wm b{font-weight:500;font-style:italic;color:#d9b66b}
       #splash svg{width:min(280px,70vw);height:auto;overflow:visible}
       #splash .body{stroke-dasharray:1;stroke-dashoffset:1;animation:sp-draw 1.8s cubic-bezier(.5,0,.2,1) infinite}
-      #splash .tag{font:600 12px/1 Manrope,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a6a24}
+      #splash .tag{font:600 11px/1 Inter,system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#b3cdbc}
       @keyframes sp-draw{0%{stroke-dashoffset:1}60%{stroke-dashoffset:0}100%{stroke-dashoffset:-1}}
       @keyframes sp-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
       @keyframes sp-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -71,7 +71,7 @@
         <img src="/favicon.svg" alt="" width="64" height="64" />
         <div class="wm">VenomSnake<b> Detector</b></div>
         <svg viewBox="0 0 280 40" fill="none" aria-hidden="true">
-          <path d="M4 20c24-26 40-26 64 0s40 26 64 0 40-26 64 0 40 26 56 4" pathLength="1" class="body" stroke="#0f6149" stroke-width="7" stroke-linecap="round" />
+          <path d="M4 20c24-26 40-26 64 0s40 26 64 0 40-26 64 0 40 26 56 4" pathLength="1" class="body" stroke="#d9b66b" stroke-width="5" stroke-linecap="round" />
         </svg>
         <div class="tag">Snake safety for India</div>
       </div>

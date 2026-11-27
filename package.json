@@ -25,6 +25,7 @@
     "helmet": "^8.1.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.546.0",
+    "motion": "^14.14.0",
     "node-cache": "^5.1.2",
     "onnxruntime-web": "^1.22.0",
     "react": "^19.0.0",
