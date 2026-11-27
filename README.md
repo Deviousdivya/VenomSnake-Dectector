@@ -61,10 +61,10 @@ India records some of the world's highest numbers of snakebite deaths, and most 
 
 | Page | What it does |
 | :--- | :--- |
-| **🔍 Identify** (`/identify`) | Upload or capture a photo and get the species, *venomous / non-venomous / not sure*, species-confidence and chance-venomous meters, alternative candidates, precautions and emergency steps. Venomous results also show call buttons, antivenom information and the nearest hospitals. |
-| **🩺 Symptom checker** (`/symptom-checker`) | No photo? Tap the bite site on a body diagram, tick symptoms and get a plain-language summary plus a **PDF** to show a doctor. Falls back to cautious built-in rules when the AI is unavailable. |
+| **🔍 Identify** (`/identify`) | Upload or capture a photo and get **one clear verdict** (*venomous, not venomous or not sure*), the species with a real reference photograph, a simple *How sure are we? High / Medium / Low*, and three things to do now. Venomous results add call buttons and the nearest hospitals. Alternatives, precautions, antivenom notes and sighting reports sit behind a single **More details** tap. |
+| **🩺 Symptom checker** (`/symptom-checker`) | No photo? A three-step guide: tap the bite site, tick symptoms, get a one-line answer (*Get emergency care now / See a doctor urgently / Get checked*) with a Call 108 button and a **PDF** for the doctor. Warning signs of nerve poisoning trigger an immediate "call 108" notice. Falls back to cautious built-in rules when the AI is unavailable. |
 | **🚑 Emergency** (`/emergency`) | One-tap 108 / 112, first-aid steps and a "do not" list, share your GPS location by share sheet or SMS, request wildlife rescue, find nearby hospitals. |
-| **📖 Big Four** (`/big-four`) | Field guide to India's four most dangerous snakes (cobra, krait, Russell's viper, saw-scaled viper) with real photographs, venom type, habits and warnings. |
+| **📖 Big Four** (`/big-four`) | A cinematic field guide to India's four most dangerous snakes (cobra, krait, Russell's viper, saw-scaled viper). Real full-screen photographs slide past as you scroll, with a chapter for each covering venom, appearance, habitat, behaviour and warnings. |
 | **📰 Insights** (`/insights`) | Trusted WHO and NCDC guidance, plus live news when a NewsAPI key is configured. |
 | **About · Privacy · Terms** | How it works and its limits, what data is used, medical disclaimer. |
 
@@ -73,6 +73,7 @@ India records some of the world's highest numbers of snakebite deaths, and most 
 - 📲 Installable **PWA** with an offline-aware banner
 - ♿ Keyboard and screen-reader friendly, reduced-motion support
 - ⚡ Branded loading screen with no unstyled flash
+- 🎞️ A classic, photographic design: a full-screen hero, a Big Four showcase that pins and slides sideways on scroll (a swipeable slider on phones and for reduced-motion users), parallax photos, count-up statistics and slide-in chapters
 
 ---
 
@@ -220,7 +221,7 @@ Returns `{ "status": "ok", "uptime": ..., "memory": ... }`.
 
 | Domain | Technologies |
 | :--- | :--- |
-| **Frontend** | React 19, TypeScript, Vite 6, React Router 7, Tailwind CSS 4, Lucide icons |
+| **Frontend** | React 19, TypeScript, Vite 6, React Router 7, Tailwind CSS 4, Motion (scroll-linked animation), Lucide icons, Playfair Display and Inter |
 | **On-device ML** | ONNX Runtime Web (WASM), SwinV2-tiny (SnakeCLEF 2024 baseline, int8) + softmax head |
 | **Cloud AI** | Google Gemini via `@google/genai` (stable-model retry) |
 | **Backend** | Express (also the Vercel function), node-cache |
@@ -244,7 +245,7 @@ Returns `{ "status": "ok", "uptime": ..., "memory": ... }`.
 
 ## 🙏 Credits
 
-Snake photographs are from Wikimedia Commons under their respective licences (credits are shown on each photo). The base model is the SnakeCLEF 2024 organisers' baseline (MIT).
+Snake photographs are from Wikimedia Commons under CC BY, CC BY-SA or public-domain licences, and the credit is shown on every photo. `scripts/fetch-photos.mjs` re-downloads them (Big Four at full size plus a reference photo for each of the 21 identifiable species) and rewrites `src/data/photoCredits.json`. The base model is the SnakeCLEF 2024 organisers' baseline (MIT).
 
 ---
 
