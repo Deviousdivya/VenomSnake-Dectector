@@ -63,6 +63,8 @@ export const bigFour: BigFourSnake[] = [
 // Real photographs from Wikimedia Commons (licences require the credit to be shown with the photo).
 export interface SnakePhotoInfo {
   src: string;
+  /** a larger version for full-screen sections */
+  lg: string;
   alt: string;
   author: string;
   license: string;
@@ -71,8 +73,8 @@ export interface SnakePhotoInfo {
 }
 
 export const bigFourPhotos: Record<BigFourSnake['id'], SnakePhotoInfo> = {
-  cobra: { src: '/images/big4-cobra.jpg', alt: 'An Indian cobra rearing up with its hood raised', author: 'Jerzy Strzelecki', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Cobra,_Naja-naja.jpg', position: '50% 55%' },
-  krait: { src: '/images/big4-krait.jpg', alt: 'A common krait, black with thin white cross-bands', author: 'Vaikoovery', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Common_Krait(Bungarus_Caeruleus)_in_Parassinikadavu_Snake_Park.jpg', position: '50% 65%' },
-  russell: { src: '/images/big4-russell.jpg', alt: "A coiled Russell's viper showing its chain of dark oval blotches", author: 'Davidvraju', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Daboia_russelii_2014.jpg', position: '60% 40%' },
-  sawscaled: { src: '/images/big4-sawscaled.jpg', alt: 'A saw-scaled viper with rough keeled scales and a pale zig-zag pattern', author: 'Uajith', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:15.Saw_Scaled_Viper.jpg', position: '70% 50%' },
+  cobra: { src: '/images/big4-cobra.jpg', lg: '/images/big4-cobra-lg.jpg', alt: 'An Indian cobra rearing up with its hood raised', author: 'Jerzy Strzelecki', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Cobra,_Naja-naja.jpg', position: '50% 55%' },
+  krait: { src: '/images/big4-krait.jpg', lg: '/images/big4-krait-lg.jpg', alt: 'A common krait, black with thin white cross-bands', author: 'Vaikoovery', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Common_Krait(Bungarus_Caeruleus)_in_Parassinikadavu_Snake_Park.jpg', position: '50% 84%' },
+  russell: { src: '/images/big4-russell.jpg', lg: '/images/big4-russell-lg.jpg', alt: "A coiled Russell's viper showing its chain of dark oval blotches", author: 'Davidvraju', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Daboia_russelii_2014.jpg', position: '60% 40%' },
+  sawscaled: { src: '/images/big4-sawscaled.jpg', lg: '/images/big4-sawscaled-lg.jpg', alt: 'A saw-scaled viper with rough keeled scales and a pale zig-zag pattern', author: 'Uajith', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:15.Saw_Scaled_Viper.jpg', position: '70% 50%' },
 };

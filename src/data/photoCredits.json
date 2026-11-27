@@ -1,0 +1,152 @@
+{
+  "big4-cobra-lg": {
+    "src": "/images/big4-cobra-lg.jpg",
+    "author": "Jerzy Strzelecki",
+    "license": "CC BY 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Cobra,_Naja-naja.jpg"
+  },
+  "big4-krait-lg": {
+    "src": "/images/big4-krait-lg.jpg",
+    "author": "Vaikoovery",
+    "license": "CC BY 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Common_Krait(Bungarus_Caeruleus)_in_Parassinikadavu_Snake_Park.jpg"
+  },
+  "big4-russell-lg": {
+    "src": "/images/big4-russell-lg.jpg",
+    "author": "Davidvraju",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Daboia_russelii_2014.jpg"
+  },
+  "big4-sawscaled-lg": {
+    "src": "/images/big4-sawscaled-lg.jpg",
+    "author": "Uajith",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:15.Saw_Scaled_Viper.jpg"
+  },
+  "Naja naja": {
+    "src": "/images/species/naja-naja.jpg",
+    "author": "Pavan Kumar N",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Indian_Cobra,_crop.jpg"
+  },
+  "Naja kaouthia": {
+    "src": "/images/species/naja-kaouthia.jpg",
+    "author": "Akash M. Deshmukh",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Monocled_cobra_(cropped).jpg"
+  },
+  "Ophiophagus hannah": {
+    "src": "/images/species/ophiophagus-hannah.jpg",
+    "author": "Michael Allen Smith from Seattle, USA",
+    "license": "CC BY-SA 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:12_-_The_Mystical_King_Cobra_and_Coffee_Forests.jpg"
+  },
+  "Bungarus caeruleus": {
+    "src": "/images/species/bungarus-caeruleus.jpg",
+    "author": "Jayendra Chiplunkar",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Bungarus_caerulus.jpg"
+  },
+  "Bungarus fasciatus": {
+    "src": "/images/species/bungarus-fasciatus.jpg",
+    "author": "Arup2602",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:The_Banded_Krait.jpg"
+  },
+  "Daboia russelii": {
+    "src": "/images/species/daboia-russelii.jpg",
+    "author": "AChawla",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Daboia_russelii_A_Chawla01.jpg"
+  },
+  "Echis carinatus": {
+    "src": "/images/species/echis-carinatus.jpg",
+    "author": "Shantanu Kuveskar",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Saw-scaled_Viper_(Echis_carinatus)_Photographed_By_Shantanu_Kuveskar.jpg"
+  },
+  "Hypnale hypnale": {
+    "src": "/images/species/hypnale-hypnale.jpg",
+    "author": "Vssekm at en.wikipedia",
+    "license": "Public domain",
+    "page": "https://commons.wikimedia.org/wiki/File:Babysnake800pix.jpg"
+  },
+  "Trimeresurus albolabris": {
+    "src": "/images/species/trimeresurus-albolabris.jpg",
+    "author": "W.A. Djatmiko",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Trimeresurus_albolabris_male.jpg"
+  },
+  "Trimeresurus malabaricus": {
+    "src": "/images/species/trimeresurus-malabaricus.jpg",
+    "author": "Girish Gowda",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Different_morphs_of_Malabar_pit_viper.jpg"
+  },
+  "Ahaetulla nasuta": {
+    "src": "/images/species/ahaetulla-nasuta.jpg",
+    "author": "Davidvraju",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Davidraju_Vine_snake.jpg"
+  },
+  "Atretium schistosum": {
+    "src": "/images/species/atretium-schistosum.jpg",
+    "author": "Gihan Jayaweera",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Olive_Keelback_water_snake_(Atretium_schistosum)_from_Sri_Lanka.jpg"
+  },
+  "Boiga trigonata": {
+    "src": "/images/species/boiga-trigonata.jpg",
+    "author": "Jidnesh Doshi",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Common_Cat_Snake_02.jpg"
+  },
+  "Coelognathus helena": {
+    "src": "/images/species/coelognathus-helena.jpg",
+    "author": "Arupananda Rao",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Close_Up_of_A_Common_Trinket.JPG"
+  },
+  "Dendrelaphis tristis": {
+    "src": "/images/species/dendrelaphis-tristis.jpg",
+    "author": "Saleem Hameed &lt;saleemham at rediffmail.com&gt;",
+    "license": "CC BY 2.5",
+    "page": "https://commons.wikimedia.org/wiki/File:Bronzeback_sal.jpg"
+  },
+  "Eryx johnii": {
+    "src": "/images/species/eryx-johnii.jpg",
+    "author": "Sagar khunte",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Eryx_johniii.jpg"
+  },
+  "Indotyphlops braminus": {
+    "src": "/images/species/indotyphlops-braminus.jpg",
+    "author": "MH Herpetology",
+    "license": "CC BY 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Brahminy_blind_snake_(Indotyphlops_braminus).jpg"
+  },
+  "Lycodon aulicus": {
+    "src": "/images/species/lycodon-aulicus.jpg",
+    "author": "Davidvraju",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Indian_wolf_snake_(2013).jpg"
+  },
+  "Oligodon arnensis": {
+    "src": "/images/species/oligodon-arnensis.jpg",
+    "author": "Saleem Hameed &lt;saleemham at rediffmail.com&gt;",
+    "license": "CC BY 2.5",
+    "page": "https://commons.wikimedia.org/wiki/File:Oligodon_affinis_sal.jpg"
+  },
+  "Ptyas mucosa": {
+    "src": "/images/species/ptyas-mucosa.jpg",
+    "author": "Augustus Binu : flickr",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Indian_Rat_Snake_(Grey_and_Yellow).jpg"
+  },
+  "Python molurus": {
+    "src": "/images/species/python-molurus.jpg",
+    "author": "Pratik Jain",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Pratik_jain_dahod_python.JPG"
+  }
+}
