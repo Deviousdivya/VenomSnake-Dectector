@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Seo } from '../seo/Seo';
+import { PageHero } from '../components/PageHero';
 
 const UPDATED = '24 November 2026';
 
@@ -7,10 +8,9 @@ function Shell({ path, title, children }: { path: string; title: string; childre
   return (
     <>
       <Seo path={path} />
+      <PageHero eyebrow="Legal" title={title} />
       <div className="container-x max-w-3xl py-12 sm:py-16">
-        <p className="eyebrow">Legal</p>
-        <h1 className="h-section mt-3 sm:!text-5xl">{title}</h1>
-        <p className="mt-3 text-sm text-muted">Last updated {UPDATED}</p>
+        <p className="text-sm text-muted">Last updated {UPDATED}</p>
         <div className="prose-lite mt-8">{children}</div>
       </div>
     </>

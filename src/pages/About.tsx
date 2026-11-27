@@ -1,17 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Seo } from '../seo/Seo';
+import { PageHero } from '../components/PageHero';
+import { bigFourPhotos } from '../data/bigFour';
 
 export default function About() {
   return (
     <>
       <Seo path="/about" />
+      <PageHero eyebrow="About" title="About VenomSnake Detector" lead="A free tool that helps people work out what kind of snake they have seen, and find help fast if someone is bitten." image={bigFourPhotos.krait.lg} position={bigFourPhotos.krait.position} />
       <div className="container-x max-w-3xl py-12 sm:py-16">
-        <p className="eyebrow">About</p>
-        <h1 className="h-section mt-3 sm:!text-5xl">About VenomSnake Detector</h1>
-        <p className="lead mt-4">
-          A free tool that helps people work out what kind of snake they have seen, and find help fast if someone is bitten.
-        </p>
-
         <div className="prose-lite mt-10">
           <h2>What it does</h2>
           <ul>

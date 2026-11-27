@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Calendar, ExternalLink, FileText, Loader2, Newspaper } from 'lucide-react';
 import { Seo } from '../seo/Seo';
+import { PageHero } from '../components/PageHero';
+import { bigFourPhotos } from '../data/bigFour';
 import { NewsItem } from '../types';
 
 const resources = [
@@ -41,12 +43,8 @@ export default function Insights() {
   return (
     <>
       <Seo path="/insights" />
+      <PageHero eyebrow="Learn more" title="Snakebite insights and trusted resources" lead="Read the guidance that public-health bodies publish — and the latest news — to stay prepared." image={bigFourPhotos.russell.lg} position={bigFourPhotos.russell.position} />
       <div className="container-x py-12 sm:py-16">
-        <header className="max-w-3xl">
-          <p className="eyebrow">Learn more</p>
-          <h1 className="h-section mt-3 sm:!text-5xl">Snakebite insights and trusted resources</h1>
-          <p className="lead mt-4">Read the guidance that public-health bodies publish — and the latest news — to stay prepared.</p>
-        </header>
 
         <section className="mt-12" aria-labelledby="res-title">
           <h2 id="res-title" className="text-2xl">Trusted resources</h2>
